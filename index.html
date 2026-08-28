@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Site Contractor Log</title>
+<style>
+:root{
+  --bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--line:#d1d5db;
+  --dark:#111111;--green:#2f855a;--red:#c53030;--amber:#b7791f;--blue:#2b6cb0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text)}
+header{background:var(--dark);color:white;padding:18px 16px;position:sticky;top:0;z-index:20}
+.header-inner{max-width:900px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:20px;font-weight:800}.site-mini{font-size:12px;opacity:.75;margin-top:3px}
+main{max-width:900px;margin:auto;padding:16px}
+.card{background:var(--card);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.hero{text-align:center;padding:26px 18px}
+.hero h1{font-size:29px;margin:0 0 6px}.hero p{margin:0;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:650px){.grid2{grid-template-columns:1fr}}
+.bigbtn{width:100%;min-height:82px;border:0;border-radius:16px;font-size:22px;font-weight:800;color:#fff}
+.green{background:var(--green)}.red{background:var(--red)}.dark{background:var(--dark)}.amber{background:var(--amber)}.blue{background:var(--blue)}
+button{border:0;border-radius:11px;padding:12px 15px;font-size:15px;font-weight:750;cursor:pointer}
+.secondary{background:#e5e7eb;color:#111827}
+label{display:block;font-size:13px;font-weight:700;margin:10px 0 6px}
+input,select,textarea{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;font-size:16px;background:#fff}
+textarea{min-height:90px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hidden{display:none!important}
+.back{background:#e5e7eb;color:#111827;margin-bottom:12px}
+.small{font-size:12px;color:var(--muted)}
+.notice{padding:12px;border-radius:11px;background:#fff7ed;border:1px solid #fed7aa;font-size:13px}
+.checkbox{display:flex;gap:9px;align-items:flex-start;margin-top:12px}.checkbox input{width:auto;margin-top:3px}
+.person{border:1px solid #e5e7eb;border-radius:13px;padding:13px;margin:9px 0;background:#fff}
+.person strong{font-size:17px}
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}
+.in{background:#d1fae5;color:#065f46}.out{background:#e5e7eb;color:#374151}
+.stat{font-size:38px;font-weight:900}.statlabel{font-size:12px;color:var(--muted)}
+.adminbar{display:flex;justify-content:flex-end}
+table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;font-size:13px}
+.tablewrap{overflow:auto;border:1px solid #e5e7eb;border-radius:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:11px 15px;border-radius:10px;display:none;z-index:50;text-align:center;max-width:90%}
+hr{border:0;border-top:1px solid #eee;margin:18px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div><div class="brand">Site Contractor Log</div><div class="site-mini" id="headerSite">Site not configured</div></div>
+    <button class="secondary" onclick="openAdmin()">Admin</button>
+  </div>
+</header>
+
+<main>
+<section id="home">
+  <div class="card hero">
+    <h1 id="homeSite">Site Contractor Log</h1>
+    <p id="homeAddress">Sign in before entering site and sign out when leaving.</p>
+  </div>
+  <div class="grid2">
+    <button class="bigbtn green" onclick="show('signinChoice')">SIGN IN</button>
+    <button class="bigbtn red" onclick="show('signout')">SIGN OUT</button>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="grid2">
+      <div><div class="stat" id="onsiteCount">0</div><div class="statlabel">Currently on site</div></div>
+      <div><div class="stat" id="todayCount">0</div><div class="statlabel">Sign-ins today</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="signinChoice" class="hidden">
+  <button class="back" onclick="show('home')">← Back</button>
+  <div class="card">
+    <h2>Sign In</h2>
+    <p class="small">Choose the option that applies to you.</p>
+    <div class="grid2">
+      <button class="bigbtn blue" onclick="show('returning')">RETURNING CONTRACTOR</button>
+      <button class="bigbtn dark" onclick="show('register')">FIRST VISIT / REGISTER</button>
+    </div>
+  </div>
+</section>
+
+<section id="returning" class="hidden">
+  <button class="back" onclick="show('signinChoice')">← Back</button>
+  <div class="card">
+    <h2>Returning Contractor</h2>
+    <label>Mobile number</label><input id="retMobile" inputmode="tel" placeholder="Enter your mobile number">
+    <button class="green" style="margin-top:12px" onclick="findReturning()">Find Me</button>
+    <div id="returningResult"></div>
+  </div>
+</section>
+
+<section id="register" class="hidden">
+  <button class="back" onclick="show('signinChoice')">← Back</button>
+  <div class="card">
+    <h2>First Visit / Registration</h2>
+    <div class="grid2">
+      <div><label>Full name *</label><input id="regName"></div>
+      <div><label>Company *</label><input id="regCompany"></div>
+      <div><label>Mobile number *</label><input id="regMobile" inputmode="tel"></div>
+      <div><label>Trade / role *</label><input id="regTrade"></div>
+      <div><label>White Card number *</label><input id="regWhite"></div>
+      <div><label>Vehicle rego</label><input id="regRego"></div>
+    </div>
+    <label>Work being carried out</label><textarea id="regReason"></textarea>
+    <div class="checkbox"><input type="checkbox" id="regInduct"><label for="regInduct" style="margin:0;font-weight:500">I confirm I have read and understood the site induction, PPE requirements, emergency procedures and site rules. *</label></div>
+    <div class="checkbox"><input type="checkbox" id="regSwms"><label for="regSwms" style="margin:0;font-weight:500">Where applicable, I confirm I have reviewed the relevant SWMS/JSA for my work.</label></div>
+    <button class="green" style="margin-top:14px" onclick="registerAndSignIn()">REGISTER & SIGN IN</button>
+  </div>
+</section>
+
+<section id="signout" class="hidden">
+  <button class="back" onclick="show('home')">← Back</button>
+  <div class="card">
+    <h2>Sign Out</h2>
+    <label>Select your name</label>
+    <select id="signoutSelect"></select>
+    <button class="red" style="margin-top:12px" onclick="signOut()">SIGN OUT NOW</button>
+  </div>
+</section>
+
+<section id="admin" class="hidden">
+  <button class="back" onclick="show('home')">← Back</button>
+  <div class="card">
+    <h2>Admin</h2>
+    <div id="adminLogin">
+      <label>Admin PIN</label><input id="adminPinEntry" type="password" inputmode="numeric" maxlength="6">
+      <button class="dark" style="margin-top:12px" onclick="adminLogin()">Open Admin</button>
+    </div>
+    <div id="adminPanel" class="hidden">
+      <div class="row">
+        <button class="amber" onclick="showAdminTab('rollcall')">Emergency Roll Call</button>
+        <button class="secondary" onclick="showAdminTab('history')">History</button>
+        <button class="secondary" onclick="showAdminTab('settings')">Site Settings</button>
+      </div>
+
+      <div id="rollcall" class="adminTab" style="margin-top:16px">
+        <h3>Who's On Site</h3>
+        <div id="rollcallList"></div>
+      </div>
+
+      <div id="history" class="adminTab hidden" style="margin-top:16px">
+        <div class="row" style="justify-content:space-between">
+          <h3>Attendance History</h3>
+          <button class="secondary" onclick="exportCSV()">Export CSV</button>
+        </div>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Name</th><th>Company</th><th>Trade</th><th>Mobile</th><th>In</th><th>Out</th><th>Status</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="settings" class="adminTab hidden" style="margin-top:16px">
+        <h3>Site Settings</h3>
+        <div class="grid2">
+          <div><label>Site / Project name *</label><input id="setSite"></div>
+          <div><label>Site address</label><input id="setAddress"></div>
+          <div><label>Project number</label><input id="setProject"></div>
+          <div><label>Site supervisor</label><input id="setSupervisor"></div>
+          <div><label>Head contractor / builder</label><input id="setBuilder"></div>
+          <div><label>Emergency contact</label><input id="setEmergency"></div>
+          <div><label>Admin PIN</label><input id="setPin" type="password" inputmode="numeric" maxlength="6" placeholder="4–6 digits"></div>
+        </div>
+        <label>Site rules / induction notes</label><textarea id="setRules"></textarea>
+        <button class="dark" style="margin-top:12px" onclick="saveSettings()">Save Settings</button>
+        <hr>
+        <div class="notice">This free version stores all data only in this browser on this device. It is not yet synced between phones, tablets or computers.</div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KSET='contractorV2_settings', KPEOPLE='contractorV2_people', KLOGS='contractorV2_logs';
+const get=(k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
+const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+function fmt(x){return x?new Date(x).toLocaleString([], {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):''}
+function sameDay(x){const a=new Date(x),b=new Date();return a.toDateString()===b.toDateString()}
+function show(id){document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');render();window.scrollTo(0,0)}
+function openAdmin(){show('admin')}
+function openPanels(){document.getElementById('adminLogin').classList.add('hidden');document.getElementById('adminPanel').classList.remove('hidden')}
+function adminLogin(){let s=get(KSET,{});let pin=document.getElementById('adminPinEntry').value;if((s.pin||'1234')===pin){openPanels();render()}else toast('Incorrect PIN')}
+function showAdminTab(id){document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');render()}
+
+function registerAndSignIn(){
+ let n=regName.value.trim(),c=regCompany.value.trim(),m=regMobile.value.trim(),t=regTrade.value.trim(),w=regWhite.value.trim();
+ if(!n||!c||!m||!t||!w)return toast('Complete all required fields');
+ if(!regInduct.checked)return toast('Induction acknowledgement is required');
+ let people=get(KPEOPLE,[]);
+ let p=people.find(x=>x.mobile===m);
+ if(!p){p={id:Date.now(),name:n,company:c,mobile:m,trade:t,white:w,rego:regRego.value.trim()};people.push(p);set(KPEOPLE,people)}
+ let logs=get(KLOGS,[]);
+ if(logs.some(x=>x.personId===p.id&&!x.out))return toast('You are already signed in');
+ logs.unshift({id:Date.now()+1,personId:p.id,name:p.name,company:p.company,mobile:p.mobile,trade:p.trade,white:p.white,rego:p.rego,reason:regReason.value.trim(),swms:regSwms.checked,in:new Date().toISOString(),out:null});
+ set(KLOGS,logs);
+ toast('Signed in successfully');show('home')
+}
+
+function findReturning(){
+ let m=retMobile.value.trim(),people=get(KPEOPLE,[]),p=people.find(x=>x.mobile===m);
+ let box=document.getElementById('returningResult');
+ if(!p){box.innerHTML='<div class="notice" style="margin-top:12px">No registration found. Please use First Visit / Register.</div>';return}
+ box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} • ${p.trade}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
+}
+function quickSignIn(id){
+ let people=get(KPEOPLE,[]),p=people.find(x=>x.id===id),logs=get(KLOGS,[]);
+ if(logs.some(x=>x.personId===id&&!x.out))return toast('Already signed in');
+ logs.unshift({id:Date.now(),personId:p.id,name:p.name,company:p.company,mobile:p.mobile,trade:p.trade,white:p.white,rego:p.rego,reason:'',swms:false,in:new Date().toISOString(),out:null});
+ set(KLOGS,logs);toast('Signed in successfully');show('home')
+}
+function signOut(){
+ let id=Number(signoutSelect.value),logs=get(KLOGS,[]),r=logs.find(x=>x.id===id&&!x.out);
+ if(!r)return toast('Select your name');
+ r.out=new Date().toISOString();set(KLOGS,logs);toast(r.name+' signed out');show('home')
+}
+function saveSettings(){
+ let site=setSite.value.trim(),pin=setPin.value.trim();
+ if(!site)return toast('Site name is required');
+ if(pin && !/^\d{4,6}$/.test(pin))return toast('PIN must be 4–6 digits');
+ let old=get(KSET,{});
+ set(KSET,{site,address:setAddress.value.trim(),project:setProject.value.trim(),supervisor:setSupervisor.value.trim(),builder:setBuilder.value.trim(),emergency:setEmergency.value.trim(),rules:setRules.value.trim(),pin:pin||old.pin||'1234'});
+ toast('Settings saved');render()
+}
+function exportCSV(){
+ let l=get(KLOGS,[]),rows=[['Name','Company','Trade','Mobile','White Card','Vehicle Rego','Work','Sign In','Sign Out','Status']];
+ l.forEach(x=>rows.push([x.name,x.company,x.trade,x.mobile,x.white,x.rego,x.reason,fmt(x.in),fmt(x.out),x.out?'Signed Out':'On Site']));
+ let csv=rows.map(r=>r.map(v=>'"'+String(v||'').replaceAll('"','""')+'"').join(',')).join('\r\n');
+ let b=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='contractor-log.csv';a.click();URL.revokeObjectURL(a.href)
+}
+function render(){
+ let s=get(KSET,{}),logs=get(KLOGS,[]),on=logs.filter(x=>!x.out);
+ headerSite.textContent=s.site||'Site not configured';
+ homeSite.textContent=s.site||'Site Contractor Log';
+ homeAddress.textContent=s.address||'Sign in before entering site and sign out when leaving.';
+ onsiteCount.textContent=on.length;todayCount.textContent=logs.filter(x=>sameDay(x.in)).length;
+ signoutSelect.innerHTML=on.length?'<option value="">Choose your name...</option>'+on.map(x=>`<option value="${x.id}">${x.name} — ${x.company}</option>`).join(''):'<option value="">Nobody is currently signed in</option>';
+ rollcallList.innerHTML=on.length?on.map(x=>`<div class="person"><div class="row" style="justify-content:space-between"><div><strong>${x.name}</strong><div class="small">${x.company} • ${x.trade}<br>${x.mobile}<br>Signed in ${fmt(x.in)}</div></div><span class="badge in">ON SITE</span></div></div>`).join(''):'<div class="small">Nobody is currently signed in.</div>';
+ historyBody.innerHTML=logs.map(x=>`<tr><td>${x.name}</td><td>${x.company}</td><td>${x.trade}</td><td>${x.mobile}</td><td>${fmt(x.in)}</td><td>${fmt(x.out)}</td><td><span class="badge ${x.out?'out':'in'}">${x.out?'OUT':'ON SITE'}</span></td></tr>`).join('');
+ setSite.value=s.site||'';setAddress.value=s.address||'';setProject.value=s.project||'';setSupervisor.value=s.supervisor||'';setBuilder.value=s.builder||'';setEmergency.value=s.emergency||'';setRules.value=s.rules||'';setPin.value='';
+}
+render();
+</script>
+</body>
+</html>
