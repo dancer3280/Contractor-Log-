@@ -249,7 +249,20 @@ function render(){
  historyBody.innerHTML=logs.map(x=>`<tr><td>${x.name}</td><td>${x.company}</td><td>${x.trade}</td><td>${x.mobile}</td><td>${fmt(x.in)}</td><td>${fmt(x.out)}</td><td><span class="badge ${x.out?'out':'in'}">${x.out?'OUT':'ON SITE'}</span></td></tr>`).join('');
  setSite.value=s.site||'';setAddress.value=s.address||'';setProject.value=s.project||'';setSupervisor.value=s.supervisor||'';setBuilder.value=s.builder||'';setEmergency.value=s.emergency||'';setRules.value=s.rules||'';setPin.value='';
 }
-render();
+const SUPABASE_URL = 'https://wboroizstaiekywtynnm.supabase.co';
+ const SUPABASE_KEY = ' sb_publishable_gwYU369wg7oIz_glhUXMQw_T3bnm7gg';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function cloudLoad(){
+const { data, error } = await sb.from('app_state').select('*');
+if(error){console.error(error);return;}  
+  if(data){
+data.forEach(row=>{  
+  if(row.id==='logs') localStorage.setItem(KLOGS,JSON.stringify(if(row.id==='settings') localStorage.setItem(KSET,JSON.stringify(row.data));
+  if(row.id==='settings') localStorage.setItem(KSET,JSON.stringify(});
+});
+}
+}  
+    render();
 </script>
 </body>
 </html>
