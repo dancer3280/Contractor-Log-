@@ -258,12 +258,13 @@ if(error){console.error(error);return;}
   if(data){
 data.forEach(row=>{  
   if(row.id==='logs') localStorage.setItem(KLOGS,JSON.stringify(if(row.id==='settings') localStorage.setItem(KSET,JSON.stringify(row.data));
-  if(row.id==='settings') localStorage.setItem(KSET,JSON.stringify(});
+  if(row.id==='settings') localStorage.setItem(KSET,cloudLoad(); render();
 });
 }
-}  
-    render();
+}
+cloudLoad();
 </script>
+   
 </body>
 </html>
   
