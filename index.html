@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Site Contractor Log</title>
-  <link rel="apple-touch-icon" href="234D1194-3B6F-43F6-B349-C71CBAFC53D4.png">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="apple-touch-icon" href="234D1194-3B6F-43F6-B349-C71CBAFC53D4.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;--line:#d1d5db;
@@ -89,7 +89,8 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
   <button class="back" onclick="show('signinChoice')">← Back</button>
   <div class="card">
     <h2>Returning Contractor</h2>
-    <label>Mobile number</label><input id="retMobile" inputmode="tel" placeholder="Enter your mobile number">
+    <label>Mobile number</label>
+    <input id="retMobile" inputmode="tel" placeholder="Enter your mobile number">
     <button class="green" style="margin-top:12px" onclick="findReturning()">Find Me</button>
     <div id="returningResult"></div>
   </div>
@@ -129,7 +130,8 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
   <div class="card">
     <h2>Admin</h2>
     <div id="adminLogin">
-      <label>Admin PIN</label><input id="adminPinEntry" type="password" inputmode="numeric" maxlength="6">
+      <label>Admin PIN</label>
+      <input id="adminPinEntry" type="password" inputmode="numeric" maxlength="6">
       <button class="dark" style="margin-top:12px" onclick="adminLogin()">Open Admin</button>
     </div>
     <div id="adminPanel" class="hidden">
@@ -171,7 +173,7 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
         <label>Site rules / induction notes</label><textarea id="setRules"></textarea>
         <button class="dark" style="margin-top:12px" onclick="saveSettings()">Save Settings</button>
         <hr>
-        <div class="notice">This free version stores all data only in this browser on this device. It is not yet synced between phones, tablets or computers.</div>
+        <div class="notice">This version syncs site settings, contractor registrations and attendance records between devices using Supabase.</div>
       </div>
     </div>
   </div>
@@ -183,90 +185,251 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
 <script>
 const KSET='contractorV2_settings', KPEOPLE='contractorV2_people', KLOGS='contractorV2_logs';
 const get=(k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
-const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
- const oldSet=set;
- set=(k,v)=>{oldSet(k,v);if(k===KLOGS)cloudSave('logs',v);if(k===KSET)cloudSave('settings',v);
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
-function fmt(x){return x?new Date(x).toLocaleString([], {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):''}
-function sameDay(x){const a=new Date(x),b=new Date();return a.toDateString()===b.toDateString()}
-function show(id){document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');render();window.scrollTo(0,0)}
+const localSet=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+const SUPABASE_URL='https://wboroizstaiekywtynnm.supabase.co';
+const SUPABASE_KEY='sb_publishable_gwYU369wg7oIz_glhUXMQw_T3bnm7gg';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+async function cloudSave(id,data){
+  const {error}=await sb.from('app_state').upsert(
+    {id,data,updated_at:new Date().toISOString()},
+    {onConflict:'id'}
+  );
+  if(error) console.error('Supabase save error:',error);
+}
+
+const set=(k,v)=>{
+  localSet(k,v);
+  if(k===KSET) cloudSave('settings',v);
+  if(k===KPEOPLE) cloudSave('people',v);
+  if(k===KLOGS) cloudSave('logs',v);
+};
+
+async function cloudLoad(){
+  const {data,error}=await sb.from('app_state').select('*');
+  if(error){
+    console.error('Supabase load error:',error);
+    render();
+    return;
+  }
+  if(data){
+    data.forEach(row=>{
+      if(row.id==='settings') localSet(KSET,row.data);
+      if(row.id==='people') localSet(KPEOPLE,row.data);
+      if(row.id==='logs') localSet(KLOGS,row.data);
+    });
+  }
+  render();
+}
+
+function toast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',2200);
+}
+
+function fmt(x){
+  return x?new Date(x).toLocaleString([],{
+    day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'
+  }):'';
+}
+
+function sameDay(x){
+  const a=new Date(x),b=new Date();
+  return a.toDateString()===b.toDateString();
+}
+
+function show(id){
+  document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  render();
+  window.scrollTo(0,0);
+}
+
 function openAdmin(){show('admin')}
-function openPanels(){document.getElementById('adminLogin').classList.add('hidden');document.getElementById('adminPanel').classList.remove('hidden')}
-function adminLogin(){let s=get(KSET,{});let pin=document.getElementById('adminPinEntry').value;if((s.pin||'1234')===pin){openPanels();render()}else toast('Incorrect PIN')}
-function showAdminTab(id){document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');render()}
+
+function openPanels(){
+  document.getElementById('adminLogin').classList.add('hidden');
+  document.getElementById('adminPanel').classList.remove('hidden');
+}
+
+function adminLogin(){
+  let s=get(KSET,{});
+  let pin=document.getElementById('adminPinEntry').value;
+  if((s.pin||'1234')===pin){
+    openPanels();
+    render();
+  }else{
+    toast('Incorrect PIN');
+  }
+}
+
+function showAdminTab(id){
+  document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  render();
+}
 
 function registerAndSignIn(){
- let n=regName.value.trim(),c=regCompany.value.trim(),m=regMobile.value.trim(),t=regTrade.value.trim(),w=regWhite.value.trim();
- if(!n||!c||!m||!t||!w)return toast('Complete all required fields');
- if(!regInduct.checked)return toast('Induction acknowledgement is required');
- let people=get(KPEOPLE,[]);
- let p=people.find(x=>x.mobile===m);
- if(!p){p={id:Date.now(),name:n,company:c,mobile:m,trade:t,white:w,rego:regRego.value.trim()};people.push(p);set(KPEOPLE,people)}
- let logs=get(KLOGS,[]);
- if(logs.some(x=>x.personId===p.id&&!x.out))return toast('You are already signed in');
- logs.unshift({id:Date.now()+1,personId:p.id,name:p.name,company:p.company,mobile:p.mobile,trade:p.trade,white:p.white,rego:p.rego,reason:regReason.value.trim(),swms:regSwms.checked,in:new Date().toISOString(),out:null});
- set(KLOGS,logs);
- toast('Signed in successfully');show('home')
+  let n=regName.value.trim(),c=regCompany.value.trim(),m=regMobile.value.trim(),t=regTrade.value.trim(),w=regWhite.value.trim();
+
+  if(!n||!c||!m||!t||!w)return toast('Complete all required fields');
+  if(!regInduct.checked)return toast('Induction acknowledgement is required');
+
+  let people=get(KPEOPLE,[]);
+  let p=people.find(x=>x.mobile===m);
+
+  if(!p){
+    p={id:Date.now(),name:n,company:c,mobile:m,trade:t,white:w,rego:regRego.value.trim()};
+    people.push(p);
+    set(KPEOPLE,people);
+  }
+
+  let logs=get(KLOGS,[]);
+  if(logs.some(x=>x.personId===p.id&&!x.out))return toast('You are already signed in');
+
+  logs.unshift({
+    id:Date.now()+1,
+    personId:p.id,
+    name:p.name,
+    company:p.company,
+    mobile:p.mobile,
+    trade:p.trade,
+    white:p.white,
+    rego:p.rego,
+    reason:regReason.value.trim(),
+    swms:regSwms.checked,
+    in:new Date().toISOString(),
+    out:null
+  });
+
+  set(KLOGS,logs);
+  toast('Signed in successfully');
+  show('home');
 }
 
 function findReturning(){
- let m=retMobile.value.trim(),people=get(KPEOPLE,[]),p=people.find(x=>x.mobile===m);
- let box=document.getElementById('returningResult');
- if(!p){box.innerHTML='<div class="notice" style="margin-top:12px">No registration found. Please use First Visit / Register.</div>';return}
- box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} • ${p.trade}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
+  let m=retMobile.value.trim(),people=get(KPEOPLE,[]),p=people.find(x=>x.mobile===m);
+  let box=document.getElementById('returningResult');
+
+  if(!p){
+    box.innerHTML='<div class="notice" style="margin-top:12px">No registration found. Please use First Visit / Register.</div>';
+    return;
+  }
+
+  box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} • ${p.trade}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
 }
+
 function quickSignIn(id){
- let people=get(KPEOPLE,[]),p=people.find(x=>x.id===id),logs=get(KLOGS,[]);
- if(logs.some(x=>x.personId===id&&!x.out))return toast('Already signed in');
- logs.unshift({id:Date.now(),personId:p.id,name:p.name,company:p.company,mobile:p.mobile,trade:p.trade,white:p.white,rego:p.rego,reason:'',swms:false,in:new Date().toISOString(),out:null});
- set(KLOGS,logs);toast('Signed in successfully');show('home')
+  let people=get(KPEOPLE,[]),p=people.find(x=>x.id===id),logs=get(KLOGS,[]);
+
+  if(logs.some(x=>x.personId===id&&!x.out))return toast('Already signed in');
+
+  logs.unshift({
+    id:Date.now(),
+    personId:p.id,
+    name:p.name,
+    company:p.company,
+    mobile:p.mobile,
+    trade:p.trade,
+    white:p.white,
+    rego:p.rego,
+    reason:'',
+    swms:false,
+    in:new Date().toISOString(),
+    out:null
+  });
+
+  set(KLOGS,logs);
+  toast('Signed in successfully');
+  show('home');
 }
+
 function signOut(){
- let id=Number(signoutSelect.value),logs=get(KLOGS,[]),r=logs.find(x=>x.id===id&&!x.out);
- if(!r)return toast('Select your name');
- r.out=new Date().toISOString();set(KLOGS,logs);toast(r.name+' signed out');show('home')
+  let id=Number(signoutSelect.value),logs=get(KLOGS,[]),r=logs.find(x=>x.id===id&&!x.out);
+  if(!r)return toast('Select your name');
+
+  r.out=new Date().toISOString();
+  set(KLOGS,logs);
+  toast(r.name+' signed out');
+  show('home');
 }
+
 function saveSettings(){
- let site=setSite.value.trim(),pin=setPin.value.trim();
- if(!site)return toast('Site name is required');
- if(pin && !/^\d{4,6}$/.test(pin))return toast('PIN must be 4–6 digits');
- let old=get(KSET,{});
- set(KSET,{site,address:setAddress.value.trim(),project:setProject.value.trim(),supervisor:setSupervisor.value.trim(),builder:setBuilder.value.trim(),emergency:setEmergency.value.trim(),rules:setRules.value.trim(),pin:pin||old.pin||'1234'});
- toast('Settings saved');render()
+  let site=setSite.value.trim(),pin=setPin.value.trim();
+
+  if(!site)return toast('Site name is required');
+  if(pin && !/^\d{4,6}$/.test(pin))return toast('PIN must be 4–6 digits');
+
+  let old=get(KSET,{});
+
+  set(KSET,{
+    site,
+    address:setAddress.value.trim(),
+    project:setProject.value.trim(),
+    supervisor:setSupervisor.value.trim(),
+    builder:setBuilder.value.trim(),
+    emergency:setEmergency.value.trim(),
+    rules:setRules.value.trim(),
+    pin:pin||old.pin||'1234'
+  });
+
+  toast('Settings saved');
+  render();
 }
+
 function exportCSV(){
- let l=get(KLOGS,[]),rows=[['Name','Company','Trade','Mobile','White Card','Vehicle Rego','Work','Sign In','Sign Out','Status']];
- l.forEach(x=>rows.push([x.name,x.company,x.trade,x.mobile,x.white,x.rego,x.reason,fmt(x.in),fmt(x.out),x.out?'Signed Out':'On Site']));
- let csv=rows.map(r=>r.map(v=>'"'+String(v||'').replaceAll('"','""')+'"').join(',')).join('\r\n');
- let b=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='contractor-log.csv';a.click();URL.revokeObjectURL(a.href)
+  let l=get(KLOGS,[]),rows=[['Name','Company','Trade','Mobile','White Card','Vehicle Rego','Work','Sign In','Sign Out','Status']];
+
+  l.forEach(x=>rows.push([
+    x.name,x.company,x.trade,x.mobile,x.white,x.rego,x.reason,fmt(x.in),fmt(x.out),x.out?'Signed Out':'On Site'
+  ]));
+
+  let csv=rows.map(r=>r.map(v=>'"'+String(v||'').replaceAll('"','""')+'"').join(',')).join('\r\n');
+
+  let b=new Blob([csv],{type:'text/csv'}),
+      a=document.createElement('a');
+
+  a.href=URL.createObjectURL(b);
+  a.download='contractor-log.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
+
 function render(){
- let s=get(KSET,{}),logs=get(KLOGS,[]),on=logs.filter(x=>!x.out);
- headerSite.textContent=s.site||'Site not configured';
- homeSite.textContent=s.site||'Site Contractor Log';
- homeAddress.textContent=s.address||'Sign in before entering site and sign out when leaving.';
- onsiteCount.textContent=on.length;todayCount.textContent=logs.filter(x=>sameDay(x.in)).length;
- signoutSelect.innerHTML=on.length?'<option value="">Choose your name...</option>'+on.map(x=>`<option value="${x.id}">${x.name} — ${x.company}</option>`).join(''):'<option value="">Nobody is currently signed in</option>';
- rollcallList.innerHTML=on.length?on.map(x=>`<div class="person"><div class="row" style="justify-content:space-between"><div><strong>${x.name}</strong><div class="small">${x.company} • ${x.trade}<br>${x.mobile}<br>Signed in ${fmt(x.in)}</div></div><span class="badge in">ON SITE</span></div></div>`).join(''):'<div class="small">Nobody is currently signed in.</div>';
- historyBody.innerHTML=logs.map(x=>`<tr><td>${x.name}</td><td>${x.company}</td><td>${x.trade}</td><td>${x.mobile}</td><td>${fmt(x.in)}</td><td>${fmt(x.out)}</td><td><span class="badge ${x.out?'out':'in'}">${x.out?'OUT':'ON SITE'}</span></td></tr>`).join('');
- setSite.value=s.site||'';setAddress.value=s.address||'';setProject.value=s.project||'';setSupervisor.value=s.supervisor||'';setBuilder.value=s.builder||'';setEmergency.value=s.emergency||'';setRules.value=s.rules||'';setPin.value='';
+  let s=get(KSET,{}),logs=get(KLOGS,[]),on=logs.filter(x=>!x.out);
+
+  headerSite.textContent=s.site||'Site not configured';
+  homeSite.textContent=s.site||'Site Contractor Log';
+  homeAddress.textContent=s.address||'Sign in before entering site and sign out when leaving.';
+
+  onsiteCount.textContent=on.length;
+  todayCount.textContent=logs.filter(x=>sameDay(x.in)).length;
+
+  signoutSelect.innerHTML=on.length
+    ? '<option value="">Choose your name...</option>'+on.map(x=>`<option value="${x.id}">${x.name} — ${x.company}</option>`).join('')
+    : '<option value="">Nobody is currently signed in</option>';
+
+  rollcallList.innerHTML=on.length
+    ? on.map(x=>`<div class="person"><div class="row" style="justify-content:space-between"><div><strong>${x.name}</strong><div class="small">${x.company} • ${x.trade}<br>${x.mobile}<br>Signed in ${fmt(x.in)}</div></div><span class="badge in">ON SITE</span></div></div>`).join('')
+    : '<div class="small">Nobody is currently signed in.</div>';
+
+  historyBody.innerHTML=logs.map(x=>`<tr><td>${x.name}</td><td>${x.company}</td><td>${x.trade}</td><td>${x.mobile}</td><td>${fmt(x.in)}</td><td>${fmt(x.out)}</td><td><span class="badge ${x.out?'out':'in'}">${x.out?'OUT':'ON SITE'}</span></td></tr>`).join('');
+
+  setSite.value=s.site||'';
+  setAddress.value=s.address||'';
+  setProject.value=s.project||'';
+  setSupervisor.value=s.supervisor||'';
+  setBuilder.value=s.builder||'';
+  setEmergency.value=s.emergency||'';
+  setRules.value=s.rules||'';
+  setPin.value='';
 }
-const SUPABASE_URL = 'https://wboroizstaiekywtynnm.supabase.co';
- const SUPABASE_KEY = ' sb_publishable_gwYU369wg7oIz_glhUXMQw_T3bnm7gg';
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-async function cloudLoad(){
-const { data, error } = await sb.from('app_state').select('*');
-if(error){console.error(error);return;}  
-  if(data){
-data.forEach(row=>{  
-  if(row.id==='logs') localStorage.setItem(KLOGS,JSON.stringify(if(row.id==='settings') localStorage.setItem(KSET,JSON.stringify(row.data));
-  if(row.id==='settings') localStorage.setItem(KSET,cloudLoad(); render();
-});
-}
-}
+
+render();
 cloudLoad();
 </script>
-   
 </body>
 </html>
-  
