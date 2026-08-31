@@ -372,7 +372,7 @@ function signOut(){
   show('home');
 }
 
-function saveSettings(){
+  async function saveSettings(){
   let site=setSite.value.trim(),pin=setPin.value.trim();
 
   if(!site)return toast('Site name is required');
@@ -390,6 +390,30 @@ function saveSettings(){
     rules:setRules.value.trim(),
     pin:pin||old.pin||'1234'
   });
+
+    const address = setAddress.value.trim();
+
+const existingProject = projects.find(p =>
+  p.name.toLowerCase() === site.toLowerCase() &&
+  (p.address || '').toLowerCase() === address.toLowerCase()
+);
+
+if(!existingProject){
+  const {error} = await sb
+    .from('projects')
+    .insert({
+      name: site,
+      address: address,
+      active: true
+    });
+
+  if(error){
+    console.error('Project save error:', error);
+    return toast('Project could not be saved');
+  }
+
+  await loadProjects();
+}
 
   toast('Settings saved');
   render();
