@@ -61,6 +61,12 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
     <h1 id="homeSite">Site Contractor Log</h1>
     <p id="homeAddress">Sign in before entering site and sign out when leaving.</p>
   </div>
+  <div class="card" style="margin-top:14px">
+  <label for="projectSelect">Select Project</label>
+  <select id="projectSelect" onchange="selectProject()">
+    <option value="">Choose a project...</option>
+  </select>
+</div>
   <div class="grid2">
     <button class="bigbtn green" onclick="show('signinChoice')">SIGN IN</button>
     <button class="bigbtn red" onclick="show('signout')">SIGN OUT</button>
@@ -445,8 +451,44 @@ function render(){
   setPin.value='';
 }
 
-render();
+let projects = [];
+
+async function loadProjects(){
+  const {data,error} = await sb
+    .from('projects')
+    .select('id,name,address')
+    .eq('active',true)
+    .order('name');
+
+  if(error){
+    console.error('Project load error:',error);
+    return;
+  }
+
+  projects = data || [];
+
+  const ps = document.getElementById('projectSelect');
+  ps.innerHTML =
+    '<option value="">Choose a project...</option>' +
+    projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+  if(projects.length === 1){
+    ps.value = String(projects[0].id);
+    selectProject();
+  }
+}
+
+function selectProject(){
+  const ps = document.getElementById('projectSelect');
+  const p = projects.find(x => String(x.id) === ps.value);
+
+  if(!p) return;
+
+  homeSite.textContent = p.name;
+  homeAddress.textContent = p.address || '';
+}render();
 cloudLoad();
+  loadProjects();
 </script>
 </body>
 </html>
