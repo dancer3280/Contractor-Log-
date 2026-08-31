@@ -154,6 +154,7 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
         <button class="amber" onclick="showAdminTab('rollcall')">Emergency Roll Call</button>
         <button class="secondary" onclick="showAdminTab('history')">History</button>
         <button class="secondary" onclick="showAdminTab('settings')">Site Settings</button>
+        <button class="secondary" onclick="showAdminTab('projects')">Projects</button>
       </div>
 
       <div id="rollcall" class="adminTab" style="margin-top:16px">
@@ -192,6 +193,17 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
       </div>
     </div>
   </div>
+ <div id="projects" class="adminTab hidden">
+  <h3>Projects</h3>
+
+  <h4>Active Projects</h4>
+  <div id="activeProjectsList"></div>
+
+  <hr>
+
+  <h4>Archived Projects</h4>
+  <div id="archivedProjectsList"></div>
+</div> 
 </section>
 </main>
 
@@ -510,6 +522,61 @@ function selectProject(){
 
   homeSite.textContent = p.name;
   homeAddress.textContent = p.address || '';
+
+async function renderProjectsAdmin(){
+  const {data,error} = await sb
+    .from('projects')
+    .select('*')
+    .order('name');
+
+  if(error){
+    console.error('Project list error:',error);
+    return;
+  }
+
+  const active = (data || []).filter(p => p.active);
+  const archived = (data || []).filter(p => !p.active);
+
+  activeProjectsList.innerHTML = active.length
+    ? active.map(p => `
+        <div class="person">
+          <div>
+            <strong>${p.name}</strong>
+            <div class="small">${p.address || ''}</div>
+          </div>
+          <button class="secondary" onclick="setProjectActive(${p.id},false)">Archive</button>
+        </div>
+      `).join('')
+    : '<div class="small">No active projects.</div>';
+
+  archivedProjectsList.innerHTML = archived.length
+    ? archived.map(p => `
+        <div class="person">
+          <div>
+            <strong>${p.name}</strong>
+            <div class="small">${p.address || ''}</div>
+          </div>
+          <button class="secondary" onclick="setProjectActive(${p.id},true)">Reactivate</button>
+        </div>
+      `).join('')
+    : '<div class="small">No archived projects.</div>';
+}
+
+async function setProjectActive(id,active){
+  const {error} = await sb
+    .from('projects')
+    .update({active})
+    .eq('id',id);
+
+  if(error){
+    console.error('Project update error:',error);
+    return toast('Project could not be updated');
+  }
+
+  await loadProjects();
+  await renderProjectsAdmin();
+  toast(active ? 'Project reactivated' : 'Project archived');
+}
 }render();
 cloudLoad();
   loadProjects();
