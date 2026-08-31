@@ -65,6 +65,7 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
     <button class="bigbtn green" onclick="show('signinChoice')">SIGN IN</button>
     <button class="bigbtn red" onclick="show('signout')">SIGN OUT</button>
   </div>
+  <button class="bigbtn blue" style="width:100%;margin-top:12px" onclick="show('onsite')">WHO'S ON SITE</button>
   <div class="card" style="margin-top:14px">
     <div class="grid2">
       <div><div class="stat" id="onsiteCount">0</div><div class="statlabel">Currently on site</div></div>
@@ -84,6 +85,14 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
     </div>
   </div>
 </section>
+<section id="onsite" class="hidden">
+  <button class="back" onclick="show('home')">← Back</button>
+  <div class="card">
+    <h2>Who's On Site</h2>
+    <div id="publicOnSiteList"></div>
+  </div>
+</section>
+  
 
 <section id="returning" class="hidden">
   <button class="back" onclick="show('signinChoice')">← Back</button>
