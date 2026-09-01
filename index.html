@@ -489,6 +489,7 @@ function render(){
   setEmergency.value=s.emergency||'';
   setRules.value=s.rules||'';
   setPin.value='';
+  if(projectSelect.value) selectProject();
 }
 
 let projects = [];
