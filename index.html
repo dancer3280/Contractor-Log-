@@ -169,7 +169,7 @@ hr{border:0;border-top:1px solid #eee;margin:18px 0}
         </div>
         <div class="tablewrap">
           <table>
-            <thead><tr><th>Name</th><th>Company</th><th>Trade</th><th>Mobile</th><th>In</th><th>Out</th><th>Status</th></tr></thead>
+          <thead><tr><th>Name</th><th>Company</th><th>Trade</th><th>Project</th><th>Mobile</th><th>In</th><th>Out</th><th>Status</th></tr></thead>
             <tbody id="historyBody"></tbody>
           </table>
         </div>
@@ -479,7 +479,7 @@ function render(){
     </div>`).join('')
   : '<div class="small">Nobody is currently on site.</div>';
 
-  historyBody.innerHTML=logs.map(x=>`<tr><td>${x.name}</td><td>${x.company}</td><td>${x.trade}</td><td>${x.mobile}</td><td>${fmt(x.in)}</td><td>${fmt(x.out)}</td><td><span class="badge ${x.out?'out':'in'}">${x.out?'OUT':'ON SITE'}</span></td></tr>`).join('');
+  historyBody.innerHTML=logs.map(x=>`<tr><td>${x.name}</td><td>${x.company}</td><td>${x.trade}</td><td>${x.projectName || ''}</td><td>${x.mobile}</td><td>${fmt(x.in)}</td><td>${fmt(x.out)}</td><td><span class="badge ${x.out?'out':'in'}">${x.out?'OUT':'ON SITE'}</span></td></tr>`).join('');
 
   setSite.value=s.site||'';
   setAddress.value=s.address||'';
