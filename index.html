@@ -525,6 +525,7 @@ function selectProject(){
   if(!p) return;
 
   homeSite.textContent = p.name;
+  headerSite.textContent = p.name;
   homeAddress.textContent = p.address || '';
 }
 async function renderProjectsAdmin(){
