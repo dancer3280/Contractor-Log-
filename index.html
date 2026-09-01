@@ -522,7 +522,7 @@ function selectProject(){
 
   homeSite.textContent = p.name;
   homeAddress.textContent = p.address || '';
-
+}
 async function renderProjectsAdmin(){
   const activeProjectsList = document.getElementById('activeProjectsList');
 const archivedProjectsList = document.getElementById('archivedProjectsList');
@@ -579,7 +579,7 @@ async function setProjectActive(id,active){
   await renderProjectsAdmin();
   toast(active ? 'Project reactivated' : 'Project archived');
 }
-}render();
+render();
 cloudLoad();
   loadProjects();
 </script>
