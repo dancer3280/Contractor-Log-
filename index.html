@@ -535,7 +535,7 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
     console.error('Project list error:',error);
     return;
   }
-
+toast('Projects received: ' + (data || []).length);
   const active = (data || []).filter(p => p.active);
   const archived = (data || []).filter(p => !p.active);
 
