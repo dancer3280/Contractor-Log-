@@ -524,6 +524,8 @@ function selectProject(){
   homeAddress.textContent = p.address || '';
 
 async function renderProjectsAdmin(){
+  const activeProjectsList = document.getElementById('activeProjectsList');
+const archivedProjectsList = document.getElementById('archivedProjectsList');
   const {data,error} = await sb
     .from('projects')
     .select('*')
