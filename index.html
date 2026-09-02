@@ -587,7 +587,7 @@ async function setProjectActive(id,active){
 
   if(error){
     console.error('Project update error:',error);
-    return toast('Project could not be updated');
+    return toast('Project update error: ' + error.message);
   }
 
   await loadProjects();
