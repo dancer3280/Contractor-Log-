@@ -221,7 +221,24 @@ button.secondary{
       
 <div id="timesheets" class="adminTab hidden" style="margin-top:16px">
   <h3>Timesheets</h3>
-  <div class="notice">Timesheet entry coming next.</div>
+  <label>Day / Date</label>
+<input id="tsDate" type="date">
+
+<label>Person</label>
+<select id="tsPerson">
+  <option value="">Choose person...</option>
+</select>
+
+<label>Project</label>
+<select id="tsProject">
+  <option value="">Choose project...</option>
+</select>
+
+<label>Hours</label>
+<input id="tsHours" type="number" step="0.5" min="0">
+
+<label>Work completed</label>
+<textarea id="tsWork" rows="3" placeholder="Describe work completed"></textarea>
 </div>
       <div id="settings" class="adminTab hidden" style="margin-top:16px">
         <h3>Site Settings</h3>
