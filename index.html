@@ -500,9 +500,9 @@ function exportCSV(){
 function render(){
   let s=get(KSET,{}),logs=get(KLOGS,[]),on=logs.filter(x=>!x.out);
 
-  headerSite.textContent=s.site||'Site not configured';
-  homeSite.textContent=s.site||'Site Contractor Log';
-  homeAddress.textContent=s.address||'Sign in before entering site and sign out when leaving.';
+headerSite.textContent='Select a project';
+homeSite.textContent='Select a Project';
+homeAddress.textContent='Choose an active project below';
 
   onsiteCount.textContent=on.length;
   todayCount.textContent=logs.filter(x=>sameDay(x.in)).length;
