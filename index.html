@@ -188,6 +188,8 @@ button.secondary{
       <input id="adminPinEntry" type="password" inputmode="numeric" maxlength="6">
       <button class="dark" style="margin-top:12px" onclick="adminLogin()">Open Admin</button>
     <button class="secondary" type="button" style="margin-top:10px;width:100%" onclick="adminFaceIdLogin()">Use Face ID</button>
+ <button class="secondary" type="button" style="margin-top:10px;width:100%" onclick="document.getElementById('faceIdSetup').classList.toggle('hidden')">Set Up / Change Face ID</button>
+      <div id="faceIdSetup" class="hidden"> 
       <label style="margin-top:16px">Face ID setup email</label>
 <input id="faceIdEmail" type="email" autocomplete="username">
 
@@ -195,7 +197,8 @@ button.secondary{
 <input id="faceIdPassword" type="password" autocomplete="current-password">
 
 <button class="secondary" type="button" style="margin-top:10px;width:100%" onclick="registerAdminFaceId()">Set Up Face ID</button>
-    </div>
+   </div>
+ </div>
     <div id="adminPanel" class="hidden">
       <div class="row">
         <button class="red" onclick="showAdminTab('rollcall')">Emergency Roll Call</button>
