@@ -254,6 +254,7 @@ button.secondary{
 </div>
 
 <button class="secondary" type="button" id="addTsJobBtn" onclick="addTimesheetJob()">+ Add Another Job</button>
+<button class="dark" type="button" style="margin-top:16px;width:100%" onclick="saveTimesheet()">Save Timesheet Entry</button>
 </div>
       <div id="settings" class="adminTab hidden" style="margin-top:16px">
         <h3>Site Settings</h3>
@@ -644,7 +645,43 @@ async function loadProjects(){
     document.getElementById('addTsJobBtn').disabled = true;
   }
 }
+function saveTimesheet(){
+  const date = document.getElementById('tsDate').value;
+  const person = document.getElementById('tsPerson').value;
 
+  if(!date) return toast('Please select a date');
+  if(!person) return toast('Please select a person');
+
+  const jobs = [...document.querySelectorAll('.tsJob')].map(job => {
+    const projectSelect = job.querySelector('.tsProjectSelect');
+
+    return {
+      projectId: projectSelect.value,
+      projectName: projectSelect.options[projectSelect.selectedIndex]?.text || '',
+      hours: Number(job.querySelector('.tsHoursInput').value || 0),
+      work: job.querySelector('.tsWorkInput').value.trim(),
+      materials: job.querySelector('.tsMaterialsInput').value.trim()
+    };
+  }).filter(job => job.projectId && job.hours > 0);
+
+  if(!jobs.length){
+    return toast('Please enter at least one project and hours');
+  }
+
+  const timesheets = get('timesheets',[]);
+
+  timesheets.push({
+    id: Date.now(),
+    date,
+    person,
+    jobs,
+    savedAt: new Date().toISOString()
+  });
+
+  set('timesheets',timesheets);
+
+  toast('Timesheet saved');
+}
 function selectProject(){
   const ps = document.getElementById('projectSelect');
   const p = projects.find(x => String(x.id) === ps.value);
