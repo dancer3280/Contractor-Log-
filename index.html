@@ -222,7 +222,8 @@ button.secondary{
 <div id="timesheets" class="adminTab hidden" style="margin-top:16px">
   <h3>Timesheets</h3>
   <label>Day / Date</label>
-<input id="tsDate" type="date">
+<div id="tsDateDisplay" style="font-size:22px;font-weight:800;text-align:left;margin-bottom:8px;"></div>
+<input id="tsDate" type="date" onchange="updateTimesheetDateDisplay()">
 
 <label>Person</label>
 <select id="tsPerson">
@@ -709,14 +710,35 @@ async function setProjectActive(id,active){
   await renderProjectsAdmin();
   toast(active ? 'Project reactivated' : 'Project archived');
 }
+  function updateTimesheetDateDisplay(){
+  const input = document.getElementById('tsDate');
+  const display = document.getElementById('tsDateDisplay');
+
+  if(!input || !display || !input.value) return;
+
+  const [y,m,d] = input.value.split('-').map(Number);
+  const date = new Date(y,m-1,d);
+
+  const suffix =
+    d % 10 === 1 && d !== 11 ? 'st' :
+    d % 10 === 2 && d !== 12 ? 'nd' :
+    d % 10 === 3 && d !== 13 ? 'rd' : 'th';
+
+  const day = date.toLocaleDateString('en-AU',{weekday:'long'});
+  const month = date.toLocaleDateString('en-AU',{month:'long'});
+
+  display.textContent = `${day} ${d}${suffix} ${month} ${String(y).slice(-2)}`;
+}
+
 render();
 cloudLoad();
-  loadProjects();
+loadProjects();
 if(document.getElementById('tsDate')){
   const d = new Date();
   document.getElementById('tsDate').value =
     `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+updateTimesheetDateDisplay();  
 </script>
 </body>
 </html>
