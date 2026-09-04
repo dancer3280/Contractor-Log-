@@ -187,6 +187,14 @@ button.secondary{
       <label>Admin PIN</label>
       <input id="adminPinEntry" type="password" inputmode="numeric" maxlength="6">
       <button class="dark" style="margin-top:12px" onclick="adminLogin()">Open Admin</button>
+    <button class="secondary" type="button" style="margin-top:10px;width:100%" onclick="adminFaceIdLogin()">Use Face ID</button>
+      <label style="margin-top:16px">Face ID setup email</label>
+<input id="faceIdEmail" type="email" autocomplete="username">
+
+<label>Face ID setup password</label>
+<input id="faceIdPassword" type="password" autocomplete="current-password">
+
+<button class="secondary" type="button" style="margin-top:10px;width:100%" onclick="registerAdminFaceId()">Set Up Face ID</button>
     </div>
     <div id="adminPanel" class="hidden">
       <div class="row">
@@ -297,7 +305,11 @@ const localSet=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 
 const SUPABASE_URL='https://wboroizstaiekywtynnm.supabase.co';
 const SUPABASE_KEY='sb_publishable_gwYU369wg7oIz_glhUXMQw_T3bnm7gg';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+  auth:{
+    experimental:{passkey:true}
+  }
+})
 
 async function cloudSave(id,data){
   const {error}=await sb.from('app_state').upsert(
@@ -373,7 +385,46 @@ function adminLogin(){
     toast('Incorrect PIN');
   }
 }
+async function adminFaceIdLogin(){
+  const {data,error} = await sb.auth.signInWithPasskey();
 
+  if(error){
+    console.error('Face ID login error:',error);
+    return toast('Face ID not set up yet');
+  }
+
+  openPanels();
+  render();
+  toast('Face ID login successful');
+}
+async function registerAdminFaceId(){
+  const email = document.getElementById('faceIdEmail').value.trim();
+  const password = document.getElementById('faceIdPassword').value;
+
+  if(!email || !password){
+    return toast('Enter admin email and password');
+  }
+
+  const {error:signInError} = await sb.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(signInError){
+    console.error('Admin sign in error:',signInError);
+    return toast('Admin sign in failed');
+  }
+
+  const {error} = await sb.auth.registerPasskey();
+
+  if(error){
+    console.error('Face ID setup error:',error);
+    return toast('Face ID setup failed');
+  }
+
+  document.getElementById('faceIdPassword').value = '';
+  toast('Face ID setup complete');
+}
 function showAdminTab(id){
   document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
