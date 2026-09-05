@@ -267,6 +267,7 @@ button.secondary{
 
 <button class="secondary" type="button" id="addTsJobBtn" onclick="addTimesheetJob()">+ Add Another Job</button>
 <button class="dark" type="button" style="margin-top:16px;width:100%" onclick="saveTimesheet()">Save Timesheet Entry</button>
+  <button class="secondary" type="button" onclick="showTimesheetReview()">Review Timesheets</button>
 </div>
       <div id="settings" class="adminTab hidden" style="margin-top:16px">
         <h3>Site Settings</h3>
@@ -297,6 +298,25 @@ button.secondary{
   <h4>Archived Projects</h4>
   <div id="archivedProjectsList"></div>
 </div> 
+  <div id="timesheetReview" class="adminTab hidden">
+  <h3>Timesheet Review</h3>
+
+  <label>Person</label>
+  <select id="reviewPerson" onchange="renderTimesheetReview()">
+    <option value="">All People</option>
+    <option value="Ashley Dance">Ashley Dance</option>
+    <option value="Sam McKinnon">Sam McKinnon</option>
+  </select>
+
+  <label>Project</label>
+  <select id="reviewProject" onchange="renderTimesheetReview()">
+    <option value="">All Projects</option>
+  </select>
+
+  <div id="timesheetReviewList"></div>
+
+  <h3 id="timesheetReviewTotal">Total Hours: 0</h3>
+</div>
 </section>
 </main>
 
@@ -433,6 +453,10 @@ function showAdminTab(id){
   document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
   render();
+}
+  function showTimesheetReview(){
+  showAdminTab('timesheetReview');
+  renderTimesheetReview();
 }
 
 function registerAndSignIn(){
@@ -738,6 +762,70 @@ function saveTimesheet(){
   set('timesheets',timesheets);
 
   toast('Timesheet saved');
+}
+  function renderTimesheetReview(){
+  const person = document.getElementById('reviewPerson').value;
+  const projectSelect = document.getElementById('reviewProject');
+  const selectedProject = projectSelect.value;
+
+  const timesheets = get('timesheets',[]);
+
+  const projectNames = [...new Set(
+    timesheets.flatMap(t =>
+      (t.jobs || []).map(j => j.projectName).filter(Boolean)
+    )
+  )].sort();
+
+  projectSelect.innerHTML =
+    '<option value="">All Projects</option>' +
+    projectNames.map(name =>
+      `<option value="${name}">${name}</option>`
+    ).join('');
+
+  projectSelect.value = selectedProject;
+
+  let totalHours = 0;
+  let html = '';
+
+  [...timesheets]
+    .sort((a,b) => String(b.date).localeCompare(String(a.date)))
+    .forEach(t => {
+
+      if(person && t.person !== person) return;
+
+      (t.jobs || []).forEach(job => {
+
+        if(selectedProject && job.projectName !== selectedProject) return;
+
+        const hours = Number(job.hours) || 0;
+        totalHours += hours;
+
+        const displayDate = new Date(t.date + 'T00:00:00')
+          .toLocaleDateString('en-AU',{
+            weekday:'long',
+            day:'numeric',
+            month:'long',
+            year:'numeric'
+          });
+
+        html += `
+          <div class="person">
+            <strong>${t.person}</strong>
+            <div>${displayDate}</div>
+            <div><strong>Project:</strong> ${job.projectName}</div>
+            <div><strong>Hours:</strong> ${hours}</div>
+            <div><strong>Work:</strong> ${job.work || '-'}</div>
+            <div><strong>Materials / Notes:</strong> ${job.materials || '-'}</div>
+          </div>
+        `;
+      });
+    });
+
+  document.getElementById('timesheetReviewList').innerHTML =
+    html || '<div class="small">No timesheet entries found.</div>';
+
+  document.getElementById('timesheetReviewTotal').textContent =
+    'Total Hours: ' + totalHours;
 }
 function selectProject(){
   const ps = document.getElementById('projectSelect');
