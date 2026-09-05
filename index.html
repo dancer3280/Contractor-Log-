@@ -661,6 +661,22 @@ if(hp) hp.value = currentHistoryProject;
 
 let projects = [];
 
+  let employees = [];
+
+async function loadEmployees(){
+  const {data,error} = await sb
+    .from('employees')
+    .select('id,name,active,is_admin')
+    .eq('active',true)
+    .order('name');
+
+  if(error){
+    console.error('Employee load error:', error);
+    return;
+  }
+
+  employees = data || [];
+}
 async function loadProjects(){
   const {data,error} = await sb
     .from('projects')
@@ -947,6 +963,7 @@ const {error} = await sb
 render();
 cloudLoad();
 loadProjects();
+loadEmployees();
 if(document.getElementById('tsDate')){
   const d = new Date();
   document.getElementById('tsDate').value =
