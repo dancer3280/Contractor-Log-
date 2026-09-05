@@ -184,6 +184,7 @@ button.secondary{
   <div class="card">
     <h2>Admin</h2>
     <div id="adminLogin">
+      <label>Admin name</label><select id="adminName"><option value="Ashley Dance">Ashley Dance</option><option value="Sam McKinnon">Sam McKinnon</option></select>
       <label>Admin PIN</label>
       <input id="adminPinEntry" type="password" inputmode="numeric" maxlength="6">
       <button class="dark" style="margin-top:12px" onclick="adminLogin()">Open Admin</button>
@@ -556,7 +557,7 @@ if(!existingProject){
   name: site,
   address: address,
   active: true,
-  loaded_by: 'Ashley Dance',
+  loaded_by: document.getElementById('adminName').value,
   loaded_at: new Date().toISOString()
 });
 
@@ -791,7 +792,7 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
 async function setProjectActive(id,active){
   const changes = active
   ? { active: true, archived_by: null, archived_at: null }
-  : { active: false, archived_by: 'Ashley Dance', archived_at: new Date().toISOString() };
+  : { active: false, archived_by: document.getElementById('adminName').value, archived_at: new Date().toISOString() };
 
 const {error} = await sb
   .from('projects')
