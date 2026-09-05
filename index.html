@@ -184,7 +184,7 @@ button.secondary{
   <div class="card">
     <h2>Admin</h2>
     <div id="adminLogin">
-      <label>Admin name</label><select id="adminName"><option value="Ashley Dance">Ashley Dance</option><option value="Sam McKinnon">Sam McKinnon</option></select>
+      <label>Admin name</label><select id="adminName" onchange="localStorage.setItem('adminName',this.value)"><option value="Ashley Dance">Ashley Dance</option><option value="Sam McKinnon">Sam McKinnon</option></select>
       <label>Admin PIN</label>
       <input id="adminPinEntry" type="password" inputmode="numeric" maxlength="6">
       <button class="dark" style="margin-top:12px" onclick="adminLogin()">Open Admin</button>
@@ -837,6 +837,7 @@ if(document.getElementById('tsDate')){
     `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 updateTimesheetDateDisplay();  
+document.getElementById('adminName').value = localStorage.getItem('adminName') || 'Ashley Dance';
 </script>
 </body>
 </html>
