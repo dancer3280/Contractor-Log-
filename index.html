@@ -553,10 +553,12 @@ if(!existingProject){
   const {error} = await sb
     .from('projects')
     .insert({
-      name: site,
-      address: address,
-      active: true
-    });
+  name: site,
+  address: address,
+  active: true,
+  loaded_by: 'Ashley Dance',
+  loaded_at: new Date().toISOString()
+});
 
   if(error){
     console.error('Project save error:', error);
@@ -788,10 +790,14 @@ alert('Projects received: ' + (data || []).length);
 }
 
 async function setProjectActive(id,active){
-  const {error} = await sb
-    .from('projects')
-    .update({active})
-    .eq('id',id);
+  const changes = active
+  ? { active: true, archived_by: null, archived_at: null }
+  : { active: false, archived_by: 'Ashley Dance', archived_at: new Date().toISOString() };
+
+const {error} = await sb
+  .from('projects')
+  .update(changes)
+  .eq('id',id);
 
   if(error){
     console.error('Project update error:',error);
