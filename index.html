@@ -241,8 +241,6 @@ button.secondary{
 <label>Person</label>
 <select id="tsPerson">
   <option value="">Choose person...</option>
-  <option value="Ashley Dance">Ashley Dance</option>
-  <option value="Sam McKinnon">Sam McKinnon</option>
 </select>
 
 <div id="tsJobs">
@@ -676,6 +674,12 @@ async function loadEmployees(){
   }
 
   employees = data || [];
+  const tsPerson = document.getElementById('tsPerson');
+if(tsPerson){
+  tsPerson.innerHTML =
+    '<option value="">Choose person...</option>' +
+    employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+}
 }
 async function loadProjects(){
   const {data,error} = await sb
