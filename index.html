@@ -760,7 +760,6 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
     console.error('Project list error:',error);
     return;
   }
-alert('Projects received: ' + (data || []).length);
   const active = (data || []).filter(p => p.active);
   const archived = (data || []).filter(p => !p.active);
 
@@ -769,7 +768,7 @@ alert('Projects received: ' + (data || []).length);
         <div class="person">
           <div>
             <strong>${p.name}</strong>
-            <div class="small">${p.address || ''}</div>
+            <div class="small">${p.address || ''}</div><div class="small">Loaded by: ${p.loaded_by || 'Not recorded'}${p.loaded_at ? ' · ' + new Date(p.loaded_at).toLocaleString('en-AU') : ''}</div>
           </div>
           <button class="secondary" onclick="setProjectActive(${p.id},false)">Archive</button>
         </div>
@@ -781,7 +780,7 @@ alert('Projects received: ' + (data || []).length);
         <div class="person">
           <div>
             <strong>${p.name}</strong>
-            <div class="small">${p.address || ''}</div>
+            <div class="small">${p.address || ''}</div><div class="small">Loaded by: ${p.loaded_by || 'Not recorded'}${p.loaded_at ? ' · ' + new Date(p.loaded_at).toLocaleString('en-AU') : ''}</div><div class="small">Archived by: ${p.archived_by || 'Not recorded'}${p.archived_at ? ' · ' + new Date(p.archived_at).toLocaleString('en-AU') : ''}</div>
           </div>
           <button class="secondary" onclick="setProjectActive(${p.id},true)">Reactivate</button>
         </div>
