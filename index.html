@@ -207,6 +207,7 @@ button.secondary{
         <button class="secondary" onclick="showAdminTab('settings')">Site Settings</button>
         <button class="secondary" onclick="showAdminTab('projects');renderProjectsAdmin()">Projects</button>
         <button class="secondary" onclick="showAdminTab('timesheets')">Timesheets</button>
+        <button class="secondary" onclick="showAdminTab('employees')">Employees</button>
       </div>
 
       <div id="rollcall" class="adminTab" style="margin-top:16px">
@@ -230,7 +231,31 @@ button.secondary{
           </table>
         </div>
       </div>
-      
+
+      <div id="employees" class="adminTab hidden">
+  <h3>Employees</h3>
+
+  <label>Employee name</label>
+  <input id="newEmployeeName" placeholder="Enter employee name">
+
+  <label style="margin-top:12px">Admin access</label>
+  <select id="newEmployeeAdmin">
+    <option value="false">No</option>
+    <option value="true">Yes</option>
+  </select>
+
+  <button class="secondary" type="button" style="margin-top:16px;width:100%" onclick="addEmployee()">Add Employee</button>
+
+  <hr>
+
+  <h4>Active Employees</h4>
+  <div id="activeEmployeesList"></div>
+
+  <hr>
+
+  <h4>Inactive Employees</h4>
+  <div id="inactiveEmployeesList"></div>
+</div>
 <div id="timesheets" class="adminTab hidden" style="margin-top:16px">
   <h3>Timesheets</h3>
   <label>Day / Date</label>
@@ -450,6 +475,7 @@ async function registerAdminFaceId(){
 function showAdminTab(id){
   document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
+  if(id === 'employees') renderEmployeesAdmin();
   render();
 }
   function showTimesheetReview(){
@@ -681,7 +707,90 @@ if(tsPerson){
     employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
 }
 }
-async function loadProjects(){
+async function renderEmployeesAdmin(){
+  const {data,error} = await sb
+    .from('employees')
+    .select('id,name,active,is_admin')
+    .order('name');
+
+  if(error){
+    console.error('Employee list error:', error);
+    return;
+  }
+
+  const active = (data || []).filter(e => e.active);
+  const inactive = (data || []).filter(e => !e.active);
+
+  const activeList = document.getElementById('activeEmployeesList');
+  const inactiveList = document.getElementById('inactiveEmployeesList');
+
+  if(activeList){
+    activeList.innerHTML = active.length
+      ? active.map(e => `
+          <div class="person">
+            <strong>${e.name}</strong>
+            <div class="small">Admin: ${e.is_admin ? 'Yes' : 'No'}</div>
+            <button class="secondary" onclick="setEmployeeActive(${e.id},false)">Deactivate</button>
+          </div>
+        `).join('')
+      : '<div class="small">No active employees.</div>';
+  }
+
+  if(inactiveList){
+    inactiveList.innerHTML = inactive.length
+      ? inactive.map(e => `
+          <div class="person">
+            <strong>${e.name}</strong>
+            <div class="small">Admin: ${e.is_admin ? 'Yes' : 'No'}</div>
+            <button class="secondary" onclick="setEmployeeActive(${e.id},true)">Reactivate</button>
+          </div>
+        `).join('')
+      : '<div class="small">No inactive employees.</div>';
+  }
+}
+  async function addEmployee(){
+  const name = document.getElementById('newEmployeeName').value.trim();
+  const isAdmin = document.getElementById('newEmployeeAdmin').value === 'true';
+
+  if(!name) return toast('Enter employee name');
+
+  const {error} = await sb
+    .from('employees')
+    .insert({
+      name,
+      active:true,
+      is_admin:isAdmin
+    });
+
+  if(error){
+    console.error('Employee add error:', error);
+    return toast('Employee could not be added');
+  }
+
+  document.getElementById('newEmployeeName').value = '';
+  document.getElementById('newEmployeeAdmin').value = 'false';
+
+  await loadEmployees();
+  await renderEmployeesAdmin();
+  toast('Employee added');
+}
+
+async function setEmployeeActive(id,active){
+  const {error} = await sb
+    .from('employees')
+    .update({active})
+    .eq('id',id);
+
+  if(error){
+    console.error('Employee update error:', error);
+    return toast('Employee could not be updated');
+  }
+
+  await loadEmployees();
+  await renderEmployeesAdmin();
+  toast(active ? 'Employee reactivated' : 'Employee deactivated');
+}
+  async function loadProjects(){
   const {data,error} = await sb
     .from('projects')
     .select('id,name,address')
