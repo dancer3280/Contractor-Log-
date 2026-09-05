@@ -772,6 +772,7 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
             <div class="small">${p.address || ''}</div><div class="small">Loaded by: ${p.loaded_by || 'Not recorded'}${p.loaded_at ? ' · ' + new Date(p.loaded_at).toLocaleString('en-AU') : ''}</div>
           </div>
           <button class="secondary" onclick="setProjectActive(${p.id},false)">Archive</button>
+          <button class="secondary" onclick="editProject(${p.id})">Edit</button>
         </div>
       `).join('')
     : '<div class="small">No active projects.</div>';
@@ -807,6 +808,33 @@ const {error} = await sb
   await loadProjects();
   await renderProjectsAdmin();
   toast(active ? 'Project reactivated' : 'Project archived');
+}
+  async function editProject(id){
+  const p = projects.find(x => x.id === id);
+  if(!p) return;
+
+  const newName = prompt('Project name', p.name);
+  if(newName === null) return;
+
+  const newAddress = prompt('Project address', p.address || '');
+  if(newAddress === null) return;
+
+  const {error} = await sb
+    .from('projects')
+    .update({
+      name: newName.trim(),
+      address: newAddress.trim()
+    })
+    .eq('id', id);
+
+  if(error){
+    console.error('Project edit error:', error);
+    return toast('Project edit error: ' + error.message);
+  }
+
+  await loadProjects();
+  await renderProjectsAdmin();
+  toast('Project updated');
 }
   function updateTimesheetDateDisplay(){
   const input = document.getElementById('tsDate');
