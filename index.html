@@ -223,7 +223,7 @@ button.secondary{
         <button class="secondary" onclick="showAdminTab('settings')">Site Settings</button>
         <button class="secondary" onclick="showAdminTab('projects');renderProjectsAdmin()">Projects</button>
         <button class="secondary" onclick="showAdminTab('timesheets')">Timesheets</button>
-        <button class="secondary" onclick="showAdminTab('employees')">Employees</button>
+      <button class="secondary" onclick="openOwnerAdmin()">Admin</button>
       </div>
 
       <div id="rollcall" class="adminTab" style="margin-top:16px">
@@ -488,7 +488,24 @@ async function registerAdminFaceId(){
   document.getElementById('faceIdPassword').value = '';
   toast('Face ID setup complete');
 }
-function showAdminTab(id){
+async function openOwnerAdmin(){
+  const {data,error} = await sb.auth.signInWithPasskey();
+
+  if(error){
+    console.error('Owner Face ID error:',error);
+    return toast('Face ID failed');
+  }
+
+  const email = (data?.user?.email || data?.session?.user?.email || '').toLowerCase();
+
+  if(email !== 'ashley.dance@bigpond.com'){
+    return toast('Owner access only');
+  }
+
+  showAdminTab('employees');
+  toast('Admin access granted');
+}
+  function showAdminTab(id){
   document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
   if(id === 'employees') renderEmployeesAdmin();
