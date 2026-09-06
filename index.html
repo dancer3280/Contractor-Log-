@@ -489,6 +489,8 @@ async function registerAdminFaceId(){
   toast('Face ID setup complete');
 }
 async function openOwnerAdmin(){
+  await sb.auth.signOut({ scope: 'local' });
+
   const {data,error} = await sb.auth.signInWithPasskey();
 
   if(error){
