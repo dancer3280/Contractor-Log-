@@ -136,7 +136,7 @@ button.secondary{
 </section>
 
 <section id="signinChoice" class="hidden">
-  <button class="back" onclick="show('home')">← Back</button>
+  <button class="back" onclick="show('home')">â† Back</button>
   <div class="card">
     <h2>Sign In</h2>
     <p class="small">Choose the option that applies to you.</p>
@@ -147,7 +147,7 @@ button.secondary{
   </div>
 </section>
 <section id="onsite" class="hidden">
-  <button class="back" onclick="show('home')">← Back</button>
+  <button class="back" onclick="show('home')">â† Back</button>
   <div class="card">
     <h2>Who's On Site</h2>
     <div id="publicOnSiteList"></div>
@@ -156,7 +156,7 @@ button.secondary{
   
 
 <section id="returning" class="hidden">
-  <button class="back" onclick="show('signinChoice')">← Back</button>
+  <button class="back" onclick="show('signinChoice')">â† Back</button>
   <div class="card">
     <h2>Returning Contractor</h2>
     <label>Mobile number</label>
@@ -167,7 +167,7 @@ button.secondary{
 </section>
 
 <section id="register" class="hidden">
-  <button class="back" onclick="show('signinChoice')">← Back</button>
+  <button class="back" onclick="show('signinChoice')">â† Back</button>
   <div class="card">
     <h2>First Visit / Registration</h2>
     <div class="grid2">
@@ -186,7 +186,7 @@ button.secondary{
 </section>
 
 <section id="signout" class="hidden">
-  <button class="back" onclick="show('home')">← Back</button>
+  <button class="back" onclick="show('home')">â† Back</button>
   <div class="card">
     <h2>Sign Out</h2>
     <label>Select your name</label>
@@ -196,7 +196,7 @@ button.secondary{
 </section>
 
 <section id="admin" class="hidden">
-  <button class="back" onclick="show('home')">← Back</button>
+  <button class="back" onclick="show('home')">â† Back</button>
   <div class="card">
     <h2>Admin</h2>
     <div id="adminLogin">
@@ -223,7 +223,7 @@ button.secondary{
         <button class="secondary" onclick="showAdminTab('settings')">Site Settings</button>
         <button class="secondary" onclick="showAdminTab('projects');renderProjectsAdmin()">Projects</button>
         <button class="secondary" onclick="showAdminTab('timesheets')">Timesheets</button>
-      <button class="secondary" onclick="alert('Admin button works')">Admin</button>
+        <button class="secondary" onclick="showAdminTab('employees')">Employees</button>
       </div>
 
       <div id="rollcall" class="adminTab" style="margin-top:16px">
@@ -317,7 +317,7 @@ button.secondary{
           <div><label>Site supervisor</label><input id="setSupervisor"></div>
           <div><label>Head contractor / builder</label><input id="setBuilder"></div>
           <div><label>Emergency contact</label><input id="setEmergency"></div>
-          <div><label>Admin PIN</label><input id="setPin" type="password" inputmode="numeric" maxlength="6" placeholder="4–6 digits"></div>
+          <div><label>Admin PIN</label><input id="setPin" type="password" inputmode="numeric" maxlength="6" placeholder="4â€“6 digits"></div>
         </div>
         <label>Site rules / induction notes</label><textarea id="setRules"></textarea>
         <button class="dark" style="margin-top:12px" onclick="saveSettings()">Save Settings</button>
@@ -488,26 +488,7 @@ async function registerAdminFaceId(){
   document.getElementById('faceIdPassword').value = '';
   toast('Face ID setup complete');
 }
-async function openOwnerAdmin(){
-  await sb.auth.signOut({ scope: 'local' });
-
-  const {data,error} = await sb.auth.signInWithPasskey();
-
-  if(error){
-    console.error('Owner Face ID error:',error);
-    return toast('Face ID failed');
-  }
-
-  const email = (data?.user?.email || data?.session?.user?.email || '').toLowerCase();
-
-  if(email !== 'ashley.dance@bigpond.com'){
-    return toast('Owner access only');
-  }
-
-  showAdminTab('employees');
-  toast('Admin access granted');
-}
-  function showAdminTab(id){
+function showAdminTab(id){
   document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
   if(id === 'employees') renderEmployeesAdmin();
@@ -567,7 +548,7 @@ function findReturning(){
     return;
   }
 
-  box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} • ${p.trade}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
+  box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} â€¢ ${p.trade}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
 }
 
 function quickSignIn(id){
@@ -611,7 +592,7 @@ function signOut(){
   let site=setSite.value.trim(),pin=setPin.value.trim();
 
   if(!site)return toast('Site name is required');
-  if(pin && !/^\d{4,6}$/.test(pin))return toast('PIN must be 4–6 digits');
+  if(pin && !/^\d{4,6}$/.test(pin))return toast('PIN must be 4â€“6 digits');
 
   let old=get(KSET,{});
 
@@ -685,17 +666,17 @@ homeAddress.textContent='Choose an active project below';
   todayCount.textContent=logs.filter(x=>sameDay(x.in)).length;
 
   signoutSelect.innerHTML=on.length
-    ? '<option value="">Choose your name...</option>'+on.map(x=>`<option value="${x.id}">${x.name} — ${x.company}</option>`).join('')
+    ? '<option value="">Choose your name...</option>'+on.map(x=>`<option value="${x.id}">${x.name} â€” ${x.company}</option>`).join('')
     : '<option value="">Nobody is currently signed in</option>';
 
   rollcallList.innerHTML=on.length
-    ? on.map(x=>`<div class="person"><div class="row" style="justify-content:space-between"><div><strong>${x.name}</strong><div class="small">${x.company} • ${x.trade}<br>${x.mobile}<br>Signed in ${fmt(x.in)}</div></div><span class="badge in">ON SITE</span></div></div>`).join('')
+    ? on.map(x=>`<div class="person"><div class="row" style="justify-content:space-between"><div><strong>${x.name}</strong><div class="small">${x.company} â€¢ ${x.trade}<br>${x.mobile}<br>Signed in ${fmt(x.in)}</div></div><span class="badge in">ON SITE</span></div></div>`).join('')
     : '<div class="small">Nobody is currently signed in.</div>';
 
   publicOnSiteList.innerHTML = on.length
   ? on.map(x => `<div class="person">
       <div><strong>${x.name}</strong></div>
-      <div class="small">${x.company || ''} • ${x.trade || ''}</div>
+      <div class="small">${x.company || ''} â€¢ ${x.trade || ''}</div>
       <div class="small">Signed in ${fmt(x.in)}</div>
     </div>`).join('')
   : '<div class="small">Nobody is currently on site.</div>';
@@ -1021,7 +1002,7 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
         <div class="person">
           <div>
             <strong>${p.name}</strong>
-            <div class="small">${p.address || ''}</div><div class="small">Loaded by: ${p.loaded_by || 'Not recorded'}${p.loaded_at ? ' · ' + new Date(p.loaded_at).toLocaleString('en-AU') : ''}</div>
+            <div class="small">${p.address || ''}</div><div class="small">Loaded by: ${p.loaded_by || 'Not recorded'}${p.loaded_at ? ' Â· ' + new Date(p.loaded_at).toLocaleString('en-AU') : ''}</div>
           </div>
           <button class="secondary" onclick="setProjectActive(${p.id},false)">Archive</button>
           <button class="secondary" onclick="editProject(${p.id})">Edit</button>
@@ -1034,7 +1015,7 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
         <div class="person">
           <div>
             <strong>${p.name}</strong>
-            <div class="small">${p.address || ''}</div><div class="small">Loaded by: ${p.loaded_by || 'Not recorded'}${p.loaded_at ? ' · ' + new Date(p.loaded_at).toLocaleString('en-AU') : ''}</div><div class="small">Archived by: ${p.archived_by || 'Not recorded'}${p.archived_at ? ' · ' + new Date(p.archived_at).toLocaleString('en-AU') : ''}</div>
+            <div class="small">${p.address || ''}</div><div class="small">Loaded by: ${p.loaded_by || 'Not recorded'}${p.loaded_at ? ' Â· ' + new Date(p.loaded_at).toLocaleString('en-AU') : ''}</div><div class="small">Archived by: ${p.archived_by || 'Not recorded'}${p.archived_at ? ' Â· ' + new Date(p.archived_at).toLocaleString('en-AU') : ''}</div>
           </div>
           <button class="secondary" onclick="setProjectActive(${p.id},true)">Reactivate</button>
         </div>
