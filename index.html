@@ -456,6 +456,7 @@ async function adminFaceIdLogin(){
     return toast('Face ID not set up yet');
   }
 
+  openPanels();
   showAdminTab('employees');
   render();
   toast('Face ID login successful');
