@@ -457,9 +457,9 @@ async function adminFaceIdLogin(){
   }
 
   openPanels();
-  showAdminTab('employees');
-  render();
-  toast('Face ID login successful');
+render();
+showAdminTab('employees');
+toast('Face ID login successful');
 }
 async function registerAdminFaceId(){
   const email = document.getElementById('faceIdEmail').value.trim();
