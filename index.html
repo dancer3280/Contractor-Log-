@@ -54,7 +54,23 @@ button.secondary{
   color:white;
   font-weight:800;
 }
+.logoBtn{
+  width:72px;
+  height:72px;
+  padding:4px;
+  border:0;
+  border-radius:16px;
+  background:white;
+  overflow:hidden;
+}
 
+.logoBtn img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+  
 #adminPanel .row button:first-child{
   background:#b91c1c !important;
   color:white !important;
@@ -90,7 +106,7 @@ button.secondary{
 <header>
   <div class="header-inner">
     <div><div class="brand">Site Contractor Log</div><div class="site-mini" id="headerSite">Site not configured</div></div>
-    <button class="secondary" onclick="openAdmin()">Admin</button>
+    <button class="logoBtn" onclick="openAdmin()"><img src="CB560B1B-5F46-40A8-9CA1-E3C2C32177D6.png" alt="Admin"></button>
   </div>
 </header>
 
