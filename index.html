@@ -100,6 +100,32 @@ button.secondary{
 #archivedProjectsList .person{
   background:#ffd6d6;
 }
+  .swipeEmployee{
+  position:relative;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+
+.swipeEmployeeContent{
+  position:relative;
+  z-index:2;
+  background:white;
+  transition:transform .2s ease;
+  touch-action:pan-y;
+}
+
+.swipeDelete{
+  position:absolute;
+  right:0;
+  top:0;
+  bottom:0;
+  width:100px;
+  background:#dc2626;
+  color:white;
+  border:0;
+  font-weight:800;
+  z-index:1;
+}
 </style>
 </head>
 <body>
@@ -801,11 +827,16 @@ async function renderEmployeesAdmin(){
   if(activeList){
     activeList.innerHTML = active.length
       ? active.map(e => `
-          <div class="person">
-            <strong>${e.name}</strong>
-            <div class="small">Admin: ${e.is_admin ? 'Yes' : 'No'}</div>
-            <button class="secondary" onclick="setEmployeeActive(${e.id},false)">Deactivate</button>
-          </div>
+          <div class="swipeEmployee">
+  <button class="swipeDelete" type="button"
+    onclick="deleteEmployee(${e.id},'${e.name}')">Delete</button>
+
+  <div class="person swipeEmployeeContent">
+    <strong>${e.name}</strong>
+    <div class="small">Admin: ${e.is_admin ? 'Yes' : 'No'}</div>
+    <button class="secondary" onclick="setEmployeeActive(${e.id},false)">Deactivate</button>
+  </div>
+</div>
         `).join('')
       : '<div class="small">No active employees.</div>';
   }
@@ -813,11 +844,16 @@ async function renderEmployeesAdmin(){
   if(inactiveList){
     inactiveList.innerHTML = inactive.length
       ? inactive.map(e => `
-          <div class="person">
-            <strong>${e.name}</strong>
-            <div class="small">Admin: ${e.is_admin ? 'Yes' : 'No'}</div>
-            <button class="secondary" onclick="setEmployeeActive(${e.id},true)">Reactivate</button>
-          </div>
+          <div class="swipeEmployee">
+  <button class="swipeDelete" type="button"
+    onclick="deleteEmployee(${e.id},'${e.name}')">Delete</button>
+
+  <div class="person swipeEmployeeContent">
+    <strong>${e.name}</strong>
+    <div class="small">Admin: ${e.is_admin ? 'Yes' : 'No'}</div>
+    <button class="secondary" onclick="setEmployeeActive(${e.id},true)">Reactivate</button>
+  </div>
+</div>
         `).join('')
       : '<div class="small">No inactive employees.</div>';
   }
@@ -869,6 +905,23 @@ async function setEmployeeActive(id,active){
   await loadEmployees();
   await renderEmployeesAdmin();
   toast(active ? 'Employee reactivated' : 'Employee deactivated');
+}
+  async function deleteEmployee(id,name){
+  if(!confirm(`Delete ${name}? This cannot be undone.`)) return;
+
+  const {error} = await sb
+    .from('employees')
+    .delete()
+    .eq('id',id);
+
+  if(error){
+    console.error('Employee delete error:',error);
+    return toast('Employee could not be deleted');
+  }
+
+  await loadEmployees();
+  await renderEmployeesAdmin();
+  toast('Employee deleted');
 }
   async function loadProjects(){
   const {data,error} = await sb
@@ -1153,6 +1206,31 @@ const {error} = await sb
   display.textContent = `${day} ${d}${suffix} ${month} ${String(y).slice(-2)}`;
 }
 
+  document.addEventListener('touchstart', e => {
+  const card = e.target.closest('.swipeEmployeeContent');
+  if(!card) return;
+
+  card.dataset.startX = e.touches[0].clientX;
+}, {passive:true});
+
+document.addEventListener('touchend', e => {
+  const card = e.target.closest('.swipeEmployeeContent');
+  if(!card || !card.dataset.startX) return;
+
+  const startX = Number(card.dataset.startX);
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if(diff < -40){
+    card.style.transform = 'translateX(-100px)';
+  }
+
+  if(diff > 40){
+    card.style.transform = 'translateX(0)';
+  }
+
+  delete card.dataset.startX;
+});
 render();
 cloudLoad();
 loadProjects();
