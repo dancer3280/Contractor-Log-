@@ -449,11 +449,14 @@ function openPanels(){
     .map(b => b.toString(16).padStart(2,'0'))
     .join('');
 }
-  function toggleEmployeePasscode(){
+function toggleEmployeePasscode(){
   const isAdmin = document.getElementById('newEmployeeAdmin').value === 'true';
-  document.getElementById('employeePasscodeWrap').classList.toggle('hidden', !isAdmin);
+  const wrap = document.getElementById('employeePasscodeWrap');
 
-  if(!isAdmin){
+  if(isAdmin){
+    wrap.classList.remove('hidden');
+  }else{
+    wrap.classList.add('hidden');
     document.getElementById('newEmployeePasscode').value = '';
   }
 }
