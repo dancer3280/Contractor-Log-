@@ -807,7 +807,9 @@ if(isAdmin && !passcode) return toast('Enter an admin passcode');
 
   document.getElementById('newEmployeeName').value = '';
   document.getElementById('newEmployeeAdmin').value = 'false';
-
+document.getElementById('newEmployeePasscode').value = '';
+toggleEmployeePasscode();
+    
   await loadEmployees();
   await renderEmployeesAdmin();
   toast('Employee added');
