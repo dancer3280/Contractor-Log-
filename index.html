@@ -255,11 +255,15 @@ button.secondary{
   <input id="newEmployeeName" placeholder="Enter employee name">
 
   <label style="margin-top:12px">Admin access</label>
-  <select id="newEmployeeAdmin">
+  <select id="newEmployeeAdmin" onchange="toggleEmployeePasscode()">
     <option value="false">No</option>
     <option value="true">Yes</option>
   </select>
 
+      <div id="employeePasscodeWrap" class="hidden">
+  <label style="margin-top:12px">Passcode</label>
+  <input id="newEmployeePasscode" type="password" inputmode="numeric" placeholder="Enter passcode">
+</div>
   <button class="secondary" type="button" style="margin-top:16px;width:100%" onclick="addEmployee()">Add Employee</button>
 
   <hr>
