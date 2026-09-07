@@ -749,6 +749,19 @@ async function loadEmployees(){
   }
 
   employees = data || [];
+  const adminSelect = document.getElementById('adminName');
+if(adminSelect){
+  const savedAdmin = localStorage.getItem('adminName') || '';
+  const admins = employees.filter(e => e.is_admin === true);
+
+  adminSelect.innerHTML = admins
+    .map(e => `<option value="${e.name}">${e.name}</option>`)
+    .join('');
+
+  if(admins.some(e => e.name === savedAdmin)){
+    adminSelect.value = savedAdmin;
+  }
+}
   const tsPerson = document.getElementById('tsPerson');
 if(tsPerson){
   tsPerson.innerHTML =
