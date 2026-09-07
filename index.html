@@ -438,6 +438,13 @@ function openPanels(){
   document.getElementById('adminPanel').classList.remove('hidden');
 }
 
+  async function hashPasscode(passcode){
+  const data = new TextEncoder().encode(passcode);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2,'0'))
+    .join('');
+}
 function adminLogin(){
   let s=get(KSET,{});
   let pin=document.getElementById('adminPinEntry').value;
@@ -778,16 +785,20 @@ async function renderEmployeesAdmin(){
   async function addEmployee(){
   const name = document.getElementById('newEmployeeName').value.trim();
   const isAdmin = document.getElementById('newEmployeeAdmin').value === 'true';
-
+const passcode = document.getElementById('newEmployeePasscode').value.trim();
+if(isAdmin && !passcode) return toast('Enter an admin passcode');
+    
   if(!name) return toast('Enter employee name');
 
-  const {error} = await sb
+  const passcodeHash = isAdmin ? await hashPasscode(passcode) : null;
+    const {error} = await sb
     .from('employees')
     .insert({
-      name,
-      active:true,
-      is_admin:isAdmin
-    });
+  name,
+  active:true,
+  is_admin:isAdmin,
+  passcode_hash:passcodeHash
+});
 
   if(error){
     console.error('Employee add error:', error);
