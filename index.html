@@ -917,7 +917,7 @@ async function setEmployeeActive(id,active){
 
   if(error){
     console.error('Employee delete error:',error);
-    return toast('Employee could not be deleted');
+    return toast('Delete error: ' + error.message);
   }
 
   await loadEmployees();
