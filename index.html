@@ -475,7 +475,7 @@ async function adminLogin(){
     .single();
 
   if(error || !data || data.passcode_hash !== pinHash){
-    return toast('Incorrect PIN');
+    return toast(error ? error.message : 'PIN does not match');
   }
 
   localStorage.setItem('adminName', adminName);
