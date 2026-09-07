@@ -460,15 +460,27 @@ function toggleEmployeePasscode(){
     document.getElementById('newEmployeePasscode').value = '';
   }
 }
-function adminLogin(){
-  let s=get(KSET,{});
-  let pin=document.getElementById('adminPinEntry').value;
-  if((s.pin||'1234')===pin){
-    openPanels();
-    render();
-  }else{
-    toast('Incorrect PIN');
+async function adminLogin(){
+  const adminName = document.getElementById('adminName').value;
+  const pin = document.getElementById('adminPinEntry').value;
+
+  const pinHash = await hashPasscode(pin);
+
+  const {data,error} = await sb
+    .from('employees')
+    .select('id,name,is_admin,active,passcode_hash')
+    .eq('name',adminName)
+    .eq('active',true)
+    .eq('is_admin',true)
+    .single();
+
+  if(error || !data || data.passcode_hash !== pinHash){
+    return toast('Incorrect PIN');
   }
+
+  localStorage.setItem('adminName', adminName);
+  openPanels();
+  render();
 }
 async function adminFaceIdLogin(){
   const {data,error} = await sb.auth.signInWithPasskey();
