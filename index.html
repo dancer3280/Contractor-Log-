@@ -388,6 +388,8 @@ button.secondary{
   <label>Week</label>
 
 <input id="reviewWeek" type="week" onchange="renderTimesheetReview()">
+
+    <div id="reviewWeekDates" class="small"></div>
     <div id="timesheetReviewList"></div>
 
   <h3 id="timesheetReviewTotal">Total Hours: 0</h3>
@@ -1058,6 +1060,21 @@ function saveTimesheet(){
 
     const selectedDate = document.getElementById('reviewDate').value;
   const selectedWeek = document.getElementById('reviewWeek').value;
+    const weekDates = document.getElementById('reviewWeekDates');
+if(selectedWeek){
+  const [year,week] = selectedWeek.split('-W').map(Number);
+  const jan4 = new Date(Date.UTC(year,0,4));
+  const monday = new Date(jan4);
+  monday.setUTCDate(jan4.getUTCDate() - (jan4.getUTCDay() || 7) + 1 + (week - 1) * 7);
+
+  const sunday = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
+
+  const fmt = d => d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+  weekDates.textContent = `${fmt(monday)} to ${fmt(sunday)}`;
+}else{
+  weekDates.textContent = '';
+}
     const timesheets = get('timesheets',[]);
 
   const projectNames = [...new Set(
