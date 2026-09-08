@@ -336,7 +336,8 @@ button.secondary{
 </div>
 
 <button class="secondary" type="button" id="addTsJobBtn" onclick="addTimesheetJob()">+ Add Another Job</button>
-<button class="dark" type="button" style="margin-top:16px;width:100%" onclick="saveTimesheet()">Save Timesheet Entry</button>
+<button id="deleteTimesheetBtn" class="hidden" type="button" onclick="deleteTimesheet(editingTimesheetId)" style="background:#dc2626;color:white;font-weight:800;">Delete Timesheet</button>
+  <button class="dark" type="button" style="margin-top:16px;width:100%" onclick="saveTimesheet()">Save Timesheet Entry</button>
   <button class="secondary" type="button" style="margin-top:12px;width:100%" onclick="showTimesheetReview()">Review Timesheets</button>
 </div>
       <div id="settings" class="adminTab hidden" style="margin-top:16px">
@@ -1150,6 +1151,7 @@ if(selectedWeek){
             <div><strong>Hours:</strong> ${hours}</div>
             <div><strong>Work:</strong> ${job.work || '-'}</div>
             <div><strong>Materials / Notes:</strong> ${job.materials || '-'}</div>
+          <button class="secondary" onclick="editTimesheet(${t.id})">Edit Timesheet</button>
           </div>
         `;
       });
@@ -1161,7 +1163,59 @@ if(selectedWeek){
   document.getElementById('timesheetReviewTotal').textContent =
     'Total Hours: ' + totalHours;
 }
-function selectProject(){
+let editingTimesheetId = null;
+
+function editTimesheet(id){
+  const timesheets = get('timesheets',[]);
+  const t = timesheets.find(x => String(x.id) === String(id));
+
+  if(!t) return toast('Timesheet not found');
+
+  editingTimesheetId = t.id;
+document.getElementById('deleteTimesheetBtn').classList.remove('hidden');
+  
+  document.getElementById('timesheetReview').classList.add('hidden');
+  document.getElementById('timesheets').classList.remove('hidden');
+
+  document.getElementById('tsDate').value = t.date;
+  document.getElementById('tsPerson').value = t.person;
+  const job = (t.jobs || [])[0];
+
+if(job){
+
+  const firstJob = document.querySelector('#tsJobs .tsJob');
+
+  if(firstJob){
+
+    firstJob.querySelector('.tsProjectSelect').value = String(job.projectId || '');
+
+    firstJob.querySelector('.tsHours').value = job.hours || '';
+
+    firstJob.querySelector('.tsWork').value = job.work || '';
+
+    firstJob.querySelector('.tsMaterials').value = job.materials || '';
+
+  }
+
+}
+}
+  function deleteTimesheet(id){
+  if(!confirm('Delete this timesheet? This cannot be undone.')) return;
+
+  let timesheets = get('timesheets',[]);
+  timesheets = timesheets.filter(t => String(t.id) !== String(id));
+
+  set('timesheets',timesheets);
+
+  editingTimesheetId = null;
+
+  document.getElementById('timesheets').classList.add('hidden');
+  document.getElementById('timesheetReview').classList.remove('hidden');
+
+  renderTimesheetReview();
+  toast('Timesheet deleted');
+}
+  function selectProject(){
   const ps = document.getElementById('projectSelect');
   const p = projects.find(x => String(x.id) === ps.value);
 
