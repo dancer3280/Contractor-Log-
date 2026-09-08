@@ -335,10 +335,10 @@ button.secondary{
   </div>
 </div>
 
-<button class="secondary" type="button" style="margin-top:18px;" ...>
+<button id="addTsJobBtn" class="secondary" type="button" onclick="addTimesheetJob()" style="margin-top:18px;">+ Add Another Job</button>
 <button id="deleteTimesheetBtn" class="hidden" type="button" onclick="deleteTimesheet(editingTimesheetId)" style="background:#dc2626;color:white;font-weight:800;">Delete Timesheet</button>
-  <button id="saveTimesheetBtn" class="dark" type="button" style="margin-top:18px;" ...>
-  <button class="secondary" type="button" style="margin-top:18px;" ...>
+  <button id="saveTimesheetBtn" class="dark" type="button" onclick="saveTimesheet()" style="margin-top:18px;">Save Timesheet Entry</button>
+  <button class="secondary" type="button" onclick="showAdminTab('timesheetReview');renderTimesheetReview()" style="margin-top:18px;">Review Timesheets</button>
 </div>
       <div id="settings" class="adminTab hidden" style="margin-top:16px">
         <h3>Site Settings</h3>
