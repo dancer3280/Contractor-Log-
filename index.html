@@ -387,9 +387,13 @@ button.secondary{
 <input id="reviewDate" type="date" onchange="renderTimesheetReview()">
   <label>Week</label>
 
-<input id="reviewWeek" type="week" onchange="renderTimesheetReview()">
+<div style="background:white;border:1px solid #d1d5db;border-radius:14px;padding:0 16px;">
 
-    <div id="reviewWeekDates" class="small"></div>
+  <input id="reviewWeek" type="week" onchange="renderTimesheetReview()" style="border:0;margin:0;padding:18px 0 6px;background:transparent;width:100%;">
+
+  <div id="reviewWeekDates" style="text-align:center;padding:0 0 14px;font-size:16px;color:#475569;"></div>
+
+</div>
     <div id="timesheetReviewList"></div>
 
   <h3 id="timesheetReviewTotal">Total Hours: 0</h3>
