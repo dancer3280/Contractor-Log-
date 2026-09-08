@@ -383,6 +383,8 @@ button.secondary{
     <option value="">All Projects</option>
   </select>
 
+    <label>Exact Date</label>
+<input id="reviewDate" type="date" onchange="renderTimesheetReview()">
   <div id="timesheetReviewList"></div>
 
   <h3 id="timesheetReviewTotal">Total Hours: 0</h3>
@@ -1051,6 +1053,7 @@ function saveTimesheet(){
   const projectSelect = document.getElementById('reviewProject');
   const selectedProject = projectSelect.value;
 
+    const selectedDate = document.getElementById('reviewDate').value;
   const timesheets = get('timesheets',[]);
 
   const projectNames = [...new Set(
@@ -1076,6 +1079,7 @@ function saveTimesheet(){
 
       if(person && t.person !== person) return;
 
+      if(selectedDate && t.date !== selectedDate) return;
       (t.jobs || []).forEach(job => {
 
         if(selectedProject && job.projectName !== selectedProject) return;
