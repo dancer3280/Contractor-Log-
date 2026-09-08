@@ -836,6 +836,7 @@ async function renderEmployeesAdmin(){
     <strong>${e.name}</strong>
     <div class="small">Admin: ${e.is_admin ? 'Yes' : 'No'}</div>
     <button class="secondary" onclick="setEmployeeActive(${e.id},false)">Deactivate</button>
+  ${e.is_admin ? `<button class="secondary" onclick="changeEmployeePasscode(${e.id},'${e.name}')">Change Passcode</button>` : ''}
   </div>
 </div>
         `).join('')
@@ -907,7 +908,26 @@ async function setEmployeeActive(id,active){
   await renderEmployeesAdmin();
   toast(active ? 'Employee reactivated' : 'Employee deactivated');
 }
-  async function deleteEmployee(id,name){
+  
+  async function changeEmployeePasscode(id,name){
+  const passcode = prompt(`Enter a new passcode for ${name}`);
+
+  if(!passcode) return;
+
+  const passcodeHash = await hashPasscode(passcode);
+
+  const {error} = await sb
+    .from('employees')
+    .update({passcode_hash:passcodeHash})
+    .eq('id',id);
+
+  if(error){
+    console.error('Passcode update error:',error);
+    return toast('Passcode could not be updated');
+  }
+
+  toast(`${name} passcode updated`);
+} async function deleteEmployee(id,name){
   if(!confirm(`Delete ${name}? This cannot be undone.`)) return;
 
   const {error} = await sb
