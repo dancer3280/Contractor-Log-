@@ -385,7 +385,10 @@ button.secondary{
 
     <label>Exact Date</label>
 <input id="reviewDate" type="date" onchange="renderTimesheetReview()">
-  <div id="timesheetReviewList"></div>
+  <label>Week</label>
+
+<input id="reviewWeek" type="week" onchange="renderTimesheetReview()">
+    <div id="timesheetReviewList"></div>
 
   <h3 id="timesheetReviewTotal">Total Hours: 0</h3>
 </div>
@@ -1054,7 +1057,8 @@ function saveTimesheet(){
   const selectedProject = projectSelect.value;
 
     const selectedDate = document.getElementById('reviewDate').value;
-  const timesheets = get('timesheets',[]);
+  const selectedWeek = document.getElementById('reviewWeek').value;
+    const timesheets = get('timesheets',[]);
 
   const projectNames = [...new Set(
     timesheets.flatMap(t =>
@@ -1080,6 +1084,15 @@ function saveTimesheet(){
       if(person && t.person !== person) return;
 
       if(selectedDate && t.date !== selectedDate) return;
+      if(selectedWeek){
+  const d = new Date(t.date + 'T00:00:00Z');
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  const tWeek = `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
+  if(tWeek !== selectedWeek) return;
+}
       (t.jobs || []).forEach(job => {
 
         if(selectedProject && job.projectName !== selectedProject) return;
