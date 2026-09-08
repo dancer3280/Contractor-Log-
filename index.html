@@ -1045,6 +1045,19 @@ function saveTimesheet(){
 
   const timesheets = get('timesheets',[]);
 
+  const duplicate = timesheets.some(t =>
+  t.date === date &&
+  t.person === person &&
+  (t.jobs || []).some(oldJob =>
+    jobs.some(newJob =>
+      String(oldJob.projectId) === String(newJob.projectId)
+    )
+  )
+);
+
+if(duplicate){
+  return toast('Timesheet already exists for this person, date and project');
+}
   timesheets.push({
     id: Date.now(),
     date,
