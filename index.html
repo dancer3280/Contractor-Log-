@@ -337,7 +337,7 @@ button.secondary{
 
 <button class="secondary" type="button" id="addTsJobBtn" onclick="addTimesheetJob()">+ Add Another Job</button>
 <button id="deleteTimesheetBtn" class="hidden" type="button" onclick="deleteTimesheet(editingTimesheetId)" style="background:#dc2626;color:white;font-weight:800;">Delete Timesheet</button>
-  <button class="dark" type="button" style="margin-top:16px;width:100%" onclick="saveTimesheet()">Save Timesheet Entry</button>
+  <button id="saveTimesheetBtn" class="dark" type="button" onclick="saveTimesheet()">Save Timesheet Entry</button>
   <button class="secondary" type="button" style="margin-top:12px;width:100%" onclick="showTimesheetReview()">Review Timesheets</button>
 </div>
       <div id="settings" class="adminTab hidden" style="margin-top:16px">
@@ -1047,7 +1047,8 @@ function saveTimesheet(){
   const timesheets = get('timesheets',[]);
 
   const duplicate = timesheets.some(t =>
-  t.date === date &&
+  String(t.id) !== String(editingTimesheetId) &&
+    t.date === date &&
   t.person === person &&
   (t.jobs || []).some(oldJob =>
     jobs.some(newJob =>
@@ -1059,6 +1060,18 @@ function saveTimesheet(){
 if(duplicate){
   return toast('Timesheet already exists for this person, date and project');
 }
+  if(editingTimesheetId){
+  const index = timesheets.findIndex(t => String(t.id) === String(editingTimesheetId));
+  if(index !== -1){
+    timesheets[index] = {
+      ...timesheets[index],
+      date,
+      person,
+      jobs,
+      savedAt: new Date().toISOString()
+    };
+  }
+}else{
   timesheets.push({
     id: Date.now(),
     date,
@@ -1066,10 +1079,38 @@ if(duplicate){
     jobs,
     savedAt: new Date().toISOString()
   });
+}
+
+}else{
+
+  timesheets.push({
+
+    id: Date.now(),
+
+    date,
+
+    person,
+
+    jobs,
+
+    savedAt: new Date().toISOString()
+
+  });
+
+}
 
   set('timesheets',timesheets);
 
-  toast('Timesheet saved');
+  const wasEditing = !!editingTimesheetId;
+editingTimesheetId = null;
+document.getElementById('saveTimesheetBtn').textContent = 'Save Timesheet Entry';
+document.getElementById('deleteTimesheetBtn').classList.add('hidden');
+toast(wasEditing ? 'Timesheet updated' : 'Timesheet saved');
+if(wasEditing){
+  document.getElementById('timesheets').classList.add('hidden');
+  document.getElementById('timesheetReview').classList.remove('hidden');
+  renderTimesheetReview();
+}
 }
   function renderTimesheetReview(){
   const person = document.getElementById('reviewPerson').value;
@@ -1173,6 +1214,7 @@ function editTimesheet(id){
 
   editingTimesheetId = t.id;
 document.getElementById('deleteTimesheetBtn').classList.remove('hidden');
+document.getElementById('saveTimesheetBtn').textContent = 'Save Changes';
   
   document.getElementById('timesheetReview').classList.add('hidden');
   document.getElementById('timesheets').classList.remove('hidden');
