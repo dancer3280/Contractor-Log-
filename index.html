@@ -1050,7 +1050,7 @@ function saveTimesheet(){
   t.person === person &&
   (t.jobs || []).some(oldJob =>
     jobs.some(newJob =>
-      String(oldJob.projectId) === String(newJob.projectId)
+      String(oldJob.projectName) === String(newJob.projectName)
     )
   )
 );
