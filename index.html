@@ -1090,7 +1090,15 @@ editingTimesheetId = null;
 document.getElementById('saveTimesheetBtn').textContent = 'Save Timesheet Entry';
 document.getElementById('deleteTimesheetBtn').classList.add('hidden');
 toast(wasEditing ? 'Timesheet updated' : 'Timesheet saved');
-if(wasEditing){
+document.getElementById('tsDate').value = '';
+document.getElementById('tsPerson').value = '';
+
+const tsJobs = document.getElementById('tsJobs');
+tsJobs.innerHTML = '';
+jobNumber = 0;
+addTimesheetJob();
+
+  if(wasEditing){
   document.getElementById('timesheets').classList.add('hidden');
   document.getElementById('timesheetReview').classList.remove('hidden');
   renderTimesheetReview();
