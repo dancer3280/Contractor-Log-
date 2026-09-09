@@ -635,7 +635,7 @@ function findReturning(){
   box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} â€¢ ${p.trade}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
 }
 
-function quickSignIn(id){
+async function quickSignIn(id){
   let people=get(KPEOPLE,[]),p=people.find(x=>x.id===id),logs=get(KLOGS,[]);
 
   if(logs.some(x=>x.personId===id&&!x.out))return toast('Already signed in');
@@ -657,17 +657,51 @@ projectName: projectSelect.options[projectSelect.selectedIndex].text,
     out:null
   });
 
-  set(KLOGS,logs);
+  const latestLog = logs[0];
+
+const {error} = await sb
+  .from('attendance_logs')
+  .insert({
+    id: latestLog.id,
+    person_id: latestLog.personId,
+    name: latestLog.name,
+    company: latestLog.company,
+    mobile: latestLog.mobile,
+    trade: latestLog.trade,
+    white: latestLog.white,
+    rego: latestLog.rego,
+    project_id: latestLog.projectId,
+    project_name: latestLog.projectName,
+    reason: latestLog.reason,
+    swms: latestLog.swms,
+    signed_in_at: latestLog.in,
+    signed_out_at: latestLog.out
+  });
+
+if(error){
+  console.error('Attendance sync error:',error);
+  return toast('Sign in sync failed: ' + error.message);
+}
+
+set(KLOGS,logs);
   toast('Signed in successfully');
   show('home');
 }
 
-function signOut(){
+async function signOut(){
   let id=Number(signoutSelect.value),logs=get(KLOGS,[]),r=logs.find(x=>x.id===id&&!x.out);
   if(!r)return toast('Select your name');
 
   r.out=new Date().toISOString();
-  set(KLOGS,logs);
+  const {error} = await sb
+  .from('attendance_logs')
+  .update({signed_out_at:r.out})
+  .eq('id',r.id);
+if(error){
+  console.error('Sign out sync error:',error);
+  return toast('Sign out sync failed: ' + error.message);
+}
+set(KLOGS,logs);
   toast(r.name+' signed out');
   show('home');
 }
@@ -739,8 +773,36 @@ function exportCSV(){
   URL.revokeObjectURL(a.href);
 }
 
-function render(){
-  let s=get(KSET,{}),logs=get(KLOGS,[]),on=logs.filter(x=>!x.out);
+async function render(){
+  let s=get(KSET,{}),logs=get(KLOGS,[]);
+
+const {data:sharedLogs,error:attendanceReadError} = await sb
+  .from('attendance_logs')
+  .select('*')
+  .order('signed_in_at',{ascending:false});
+
+if(attendanceReadError){
+  console.error('Attendance load error:',attendanceReadError);
+}else if(sharedLogs){
+  logs = sharedLogs.map(x => ({
+    id:x.id,
+    personId:x.person_id,
+    name:x.name,
+    company:x.company,
+    mobile:x.mobile,
+    trade:x.trade,
+    white:x.white,
+    rego:x.rego,
+    projectId:x.project_id,
+    projectName:x.project_name,
+    reason:x.reason,
+    swms:x.swms,
+    in:x.signed_in_at,
+    out:x.signed_out_at
+  }));
+  set(KLOGS,logs);
+}
+let on=logs.filter(x=>!x.out);
 
 headerSite.textContent='Select a project';
 homeSite.textContent='Select a Project';
