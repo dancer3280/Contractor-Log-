@@ -396,6 +396,7 @@ button.secondary{
   <div id="reviewWeekDates" style="text-align:center;padding:0 0 14px;font-size:16px;color:#475569;"></div>
 
 </div>
+   <button class="secondary" type="button" onclick="exportTimesheetWeekPDF()">Export Week to PDF</button>
     <div id="timesheetReviewList"></div>
 
   <h3 id="timesheetReviewTotal">Total Hours: 0</h3>
@@ -405,6 +406,8 @@ button.secondary{
 
 <div class="toast" id="toast"></div>
 
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
 const KSET='contractorV2_settings', KPEOPLE='contractorV2_people', KLOGS='contractorV2_logs';
 const get=(k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
@@ -1288,6 +1291,101 @@ addTimesheetJob();
   document.getElementById('timesheetReview').classList.remove('hidden');
   renderTimesheetReview();
 }
+}
+ async function exportTimesheetWeekPDF(){
+  const person = document.getElementById('reviewPerson').value;
+  const selectedWeek = document.getElementById('reviewWeek').value;
+
+  if(!person) return toast('Choose a person first');
+  if(!selectedWeek) return toast('Choose a week first');
+
+  const [year,week] = selectedWeek.split('-W').map(Number);
+
+  const jan4 = new Date(Date.UTC(year,0,4));
+  const monday = new Date(jan4);
+  monday.setUTCDate(jan4.getUTCDate() - ((jan4.getUTCDay() + 6) % 7) + (week - 1) * 7);
+
+  const sunday = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
+
+  const fmtISO = d => d.toISOString().slice(0,10);
+
+  const startDate = fmtISO(monday);
+  const endDate = fmtISO(sunday);
+
+  let timesheets = get('timesheets',[]);
+
+  const weekly = timesheets
+    .filter(t =>
+      t.person === person &&
+      t.date >= startDate &&
+      t.date <= endDate
+    )
+    .sort((a,b) => String(a.date).localeCompare(String(b.date)));
+
+  if(!weekly.length) return toast('No timesheets found for that week');
+
+  const rows = [];
+  let totalHours = 0;
+
+  weekly.forEach(t => {
+    (t.jobs || []).forEach(job => {
+      const hours = Number(job.hours) || 0;
+      totalHours += hours;
+
+      const displayDate = new Date(t.date + 'T00:00:00')
+        .toLocaleDateString('en-AU',{
+          weekday:'short',
+          day:'numeric',
+          month:'short',
+          year:'numeric'
+        });
+
+      rows.push([
+        displayDate,
+        job.projectName || '',
+        hours,
+        job.work || '',
+        job.materials || ''
+      ]);
+    });
+  });
+
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text('Weekly Timesheet',14,18);
+
+  doc.setFontSize(11);
+  doc.text(`Employee: ${person}`,14,28);
+  doc.text(`Week: ${startDate} to ${endDate}`,14,35);
+
+  doc.autoTable({
+    startY:42,
+    head:[['Date','Project','Hours','Work Completed','Materials / Notes']],
+    body:rows,
+    styles:{
+      fontSize:8,
+      cellPadding:2
+    },
+    columnStyles:{
+      0:{cellWidth:27},
+      1:{cellWidth:38},
+      2:{cellWidth:15},
+      3:{cellWidth:55},
+      4:{cellWidth:50}
+    }
+  });
+
+  const finalY = doc.lastAutoTable.finalY + 10;
+
+  doc.setFontSize(12);
+  doc.text(`Total Hours: ${totalHours}`,14,finalY);
+
+  const safeName = person.replace(/\s+/g,'-');
+
+  doc.save(`${safeName}-${startDate}-to-${endDate}.pdf`);
 }
   async function renderTimesheetReview(){
   const person = document.getElementById('reviewPerson').value;
