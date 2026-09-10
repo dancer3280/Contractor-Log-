@@ -1354,14 +1354,15 @@ addTimesheetJob();
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF();
 
-  const logoBlob = await fetch('5a7f91406aaaea38e9830ec4807f19be.jpeg').then(r => r.blob());
-const logoData = await new Promise(resolve => {
-  const reader = new FileReader();
-  reader.onload = () => resolve(reader.result);
-  reader.readAsDataURL(logoBlob);
+  const logo = new Image();
+logo.src = '5a7f91406aaaea38e9830ec4807f19be.jpeg';
+
+await new Promise((resolve,reject) => {
+  logo.onload = resolve;
+  logo.onerror = reject;
 });
 
-doc.addImage(logoData,'JPEG',14,8,80,53);
+doc.addImage(logo,'JPEG',14,8,80,53);
   doc.setFontSize(18);
   doc.text('Weekly Timesheet',14,70);
 
