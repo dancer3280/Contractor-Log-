@@ -1286,6 +1286,7 @@ if(timesheetLoadError){
   const tWeek = `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
   if(tWeek !== selectedWeek) return;
 }
+     const multipleJobs = (t.jobs || []).length > 1;
       (t.jobs || []).forEach(job => {
 
         if(selectedProject && job.projectName !== selectedProject) return;
@@ -1305,7 +1306,7 @@ if(timesheetLoadError){
           <div class="person">
             <strong>${t.person}</strong>
             <div>${displayDate}</div>
-            <div><strong>Project:</strong> ${job.projectName}</div>
+            <div><strong>Project:</strong> <span style="color:${multipleJobs ? '#f97316' : 'inherit'};font-weight:${multipleJobs ? '800' : '400'}">${job.projectName}</span></div>
             <div><strong>Hours:</strong> ${hours}</div>
             <div><strong>Work:</strong> ${job.work || '-'}</div>
             <div><strong>Materials / Notes:</strong> ${job.materials || '-'}</div>
