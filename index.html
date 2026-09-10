@@ -308,10 +308,11 @@ button.secondary{
   <label>Day / Date</label>
 <div id="tsDateDisplay" style="font-size:22px;font-weight:800;text-align:left;margin-bottom:8px;"></div>
 <label>Manually select date</label>
-  <input id="tsDate" type="date" onchange="updateTimesheetDateDisplay()">
+  <input id="tsDate" type="hidden">
+<div id="timesheetCalendar"></div>
 
 <label>Person</label>
-<select id="tsPerson">
+<select id="tsPerson" onchange="renderTimesheetCalendar()">
   <option value="">Choose person...</option>
 </select>
 
@@ -576,7 +577,8 @@ function showAdminTab(id){
   document.querySelectorAll('.adminTab').forEach(x=>x.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
   if(id === 'employees') renderEmployeesAdmin();
-  render();
+ if(id === 'timesheets') renderTimesheetCalendar();
+ render();
 }
   function showTimesheetReview(){
   showAdminTab('timesheetReview');
@@ -1057,7 +1059,94 @@ async function setEmployeeActive(id,active){
     selectProject();
   }
 }
-  function addTimesheetJob(){
+  let timesheetCalendarMonth = new Date();
+
+ const today = new Date();
+timesheetCalendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+function moveTimesheetCalendar(change){
+  timesheetCalendarMonth.setMonth(timesheetCalendarMonth.getMonth() + change);
+  renderTimesheetCalendar();
+}
+
+function selectTimesheetCalendarDate(date){
+  document.getElementById('tsDate').value = date;
+
+  const d = new Date(date + 'T00:00:00');
+  document.getElementById('tsDateDisplay').textContent =
+    d.toLocaleDateString('en-AU',{
+      weekday:'long',
+      day:'numeric',
+      month:'long',
+      year:'numeric'
+    });
+
+  renderTimesheetCalendar();
+}
+
+function renderTimesheetCalendar(){
+  const cal = document.getElementById('timesheetCalendar');
+  if(!cal) return;
+
+  const person = document.getElementById('tsPerson')?.value || '';
+  const selectedDate = document.getElementById('tsDate')?.value || '';
+  const localMarkers = get('timesheetMarkers',[]);
+
+const markedDates = new Set(
+  localMarkers
+    .filter(m => m.person === person)
+    .map(m => m.date)
+);
+  const year = timesheetCalendarMonth.getFullYear();
+  const month = timesheetCalendarMonth.getMonth();
+  const firstDay = new Date(year,month,1);
+  const daysInMonth = new Date(year,month + 1,0).getDate();
+  const start = (firstDay.getDay() + 6) % 7;
+
+  let days = '';
+
+  for(let i=0;i<start;i++) days += '<div></div>';
+
+  for(let day=1;day<=daysInMonth;day++){
+    const date =
+      `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+    const marked = markedDates.has(date);
+    const selected = selectedDate === date;
+
+    days += `
+      <button type="button"
+        onclick="selectTimesheetCalendarDate('${date}')"
+        style="
+          height:42px;
+          border-radius:50%;
+          border:${selected ? '3px solid #2563eb' : '0'};
+          background:${marked ? '#22c55e' : 'transparent'};
+          color:${marked ? 'white' : '#111827'};
+          font-weight:${marked ? '800' : '500'};
+        ">
+        ${day}
+      </button>`;
+  }
+
+  const title = new Date(year,month,1)
+    .toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+
+  cal.innerHTML = `
+    <div style="margin:12px 0 18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <button type="button" class="secondary" onclick="moveTimesheetCalendar(-1)">‹</button>
+        <strong>${title}</strong>
+        <button type="button" class="secondary" onclick="moveTimesheetCalendar(1)">›</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center">
+        <strong>M</strong><strong>T</strong><strong>W</strong><strong>T</strong>
+        <strong>F</strong><strong>S</strong><strong>S</strong>
+        ${days}
+      </div>
+    </div>`;
+}
+ function addTimesheetJob(){
   const jobs = document.querySelectorAll('.tsJob');
 
   if(jobs.length >= 5) return;
@@ -1174,7 +1263,14 @@ if(timesheetSyncError){
   return toast('Timesheet sync failed: ' + timesheetSyncError.message);
 }
   set('timesheets',timesheets);
+const markers = get('timesheetMarkers',[]);
 
+if(!markers.some(m => m.person === person && m.date === date)){
+  markers.push({person,date});
+  set('timesheetMarkers',markers);
+}
+renderTimesheetCalendar();
+ 
   const wasEditing = !!editingTimesheetId;
 editingTimesheetId = null;
 document.getElementById('saveTimesheetBtn').textContent = 'Save Timesheet Entry';
