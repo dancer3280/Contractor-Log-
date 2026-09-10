@@ -822,7 +822,7 @@ homeAddress.textContent='Choose an active project below';
   publicOnSiteList.innerHTML = on.length
   ? on.map(x => `<div class="person">
       <div><strong>${x.name}</strong></div>
-      <div class="small">${x.company || ''} â€¢ ${x.trade || ''}</div>
+      <div class="small">${x.company || ''} &bull; ${x.trade || ''}</div>
       <div class="small">Signed in ${fmt(x.in)}</div>
     </div>`).join('')
   : '<div class="small">Nobody is currently on site.</div>';
