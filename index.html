@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -1083,7 +1083,7 @@ async function setEmployeeActive(id,active){
     document.getElementById('addTsJobBtn').disabled = true;
   }
 }
-function saveTimesheet(){
+async function saveTimesheet(){
   const date = document.getElementById('tsDate').value;
   const person = document.getElementById('tsPerson').value;
 
@@ -1145,6 +1145,24 @@ if(duplicate){
 
 
 
+  const syncedTimesheet = editingTimesheetId
+  ? timesheets.find(t => String(t.id) === String(editingTimesheetId))
+  : timesheets[timesheets.length - 1];
+
+const {error:timesheetSyncError} = await sb
+  .from('timesheets')
+  .upsert({
+    id: syncedTimesheet.id,
+    date: syncedTimesheet.date,
+    person: syncedTimesheet.person,
+    jobs: syncedTimesheet.jobs,
+    saved_at: syncedTimesheet.savedAt
+  });
+
+if(timesheetSyncError){
+  console.error('Timesheet sync error:',timesheetSyncError);
+  return toast('Timesheet sync failed: ' + timesheetSyncError.message);
+}
   set('timesheets',timesheets);
 
   const wasEditing = !!editingTimesheetId;
@@ -1166,7 +1184,7 @@ addTimesheetJob();
   renderTimesheetReview();
 }
 }
-  function renderTimesheetReview(){
+  
   const person = document.getElementById('reviewPerson').value;
   const projectSelect = document.getElementById('reviewProject');
   const selectedProject = projectSelect.value;
