@@ -816,7 +816,7 @@ homeAddress.textContent='Choose an active project below';
     : '<option value="">Nobody is currently signed in</option>';
 
   rollcallList.innerHTML=on.length
-    ? on.map(x=>`<div class="person"><div class="row" style="justify-content:space-between"><div><strong>${x.name}</strong><div class="small">${x.company} â€¢ ${x.trade}<br>${x.mobile}<br>Signed in ${fmt(x.in)}</div></div><span class="badge in">ON SITE</span></div></div>`).join('')
+    ? on.map(x=>`<div class="person"><div class="row" style="justify-content:space-between"><div><strong>${x.name}</strong><div class="small">${x.company || ''} &bull; ${x.trade || ''}<br>${x.mobile || ''}<br>Signed in ${fmt(x.in)}</div></div><span class="badge in">ON SITE</span></div></div>`).join('')
     : '<div class="small">Nobody is currently signed in.</div>';
 
   publicOnSiteList.innerHTML = on.length
