@@ -1206,7 +1206,42 @@ if(selectedWeek){
 }else{
   weekDates.textContent = '';
 }
-    const timesheets = get('timesheets',[]);
+    let timesheets = get('timesheets',[]);
+
+if(timesheets.length){
+  const {error:uploadError} = await sb
+    .from('timesheets')
+    .upsert(timesheets.map(t => ({
+      id:t.id,
+      date:t.date,
+      person:t.person,
+      jobs:t.jobs,
+      saved_at:t.savedAt
+    })));
+
+  if(uploadError){
+    console.error('Existing timesheet upload error:',uploadError);
+  }
+}
+
+const {data:sharedTimesheets,error:timesheetLoadError} = await sb
+  .from('timesheets')
+  .select('*')
+  .order('date',{ascending:false});
+
+if(timesheetLoadError){
+  console.error('Timesheet load error:',timesheetLoadError);
+}else if(sharedTimesheets){
+  timesheets = sharedTimesheets.map(t => ({
+    id:t.id,
+    date:t.date,
+    person:t.person,
+    jobs:t.jobs || [],
+    savedAt:t.saved_at
+  }));
+
+  set('timesheets',timesheets);
+}
 
   const projectNames = [...new Set(
     timesheets.flatMap(t =>
