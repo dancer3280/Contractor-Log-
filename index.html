@@ -1455,9 +1455,18 @@ if(job){
 
 }
 }
-  function deleteTimesheet(id){
+  async function deleteTimesheet(id){
   if(!confirm('Delete this timesheet? This cannot be undone.')) return;
 
+   const {error} = await sb
+  .from('timesheets')
+  .delete()
+  .eq('id',id);
+
+if(error){
+  console.error('Timesheet delete error:',error);
+  return toast('Delete error: ' + error.message);
+}
   let timesheets = get('timesheets',[]);
   timesheets = timesheets.filter(t => String(t.id) !== String(id));
 
