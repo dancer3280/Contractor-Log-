@@ -593,10 +593,20 @@ function registerAndSignIn(){
   let p=people.find(x=>x.mobile===m);
 
   if(!p){
-    p={id:Date.now(),name:n,company:c,mobile:m,trade:t,white:w,rego:regRego.value.trim()};
-    people.push(p);
-    set(KPEOPLE,people);
-  }
+  p={id:Date.now(),name:n,company:c,mobile:m,trade:t,white:w,rego:regRego.value.trim()};
+  people.push(p);
+}else{
+  Object.assign(p,{
+    name:n,
+    company:c,
+    mobile:m,
+    trade:t,
+    white:w,
+    rego:regRego.value.trim()
+  });
+}
+
+set(KPEOPLE,people);
 
   let logs=get(KLOGS,[]);
   if(logs.some(x=>x.personId===p.id&&!x.out))return toast('You are already signed in');
