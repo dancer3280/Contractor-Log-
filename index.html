@@ -385,18 +385,17 @@ button.secondary{
     <option value="">All Projects</option>
   </select>
 
-    <label>Exact Date</label>
-<input id="reviewDate" type="date" style="height:52px;min-height:52px;padding:10px 
-  <label>Week</label>
-
-
-<div style="background:white;border:1px solid #d1d5db;border-radius:14px;padding:0 16px;">
-
-  <input id="reviewWeek" type="week" style="height:52px;min-height:52px;padding:10px 14px;" onchange="renderTimesheetReview()">
-
-  <div id="reviewWeekDates" style="text-align:center;padding:0 0 14px;font-size:16px;color:#475569;"></div>
-
+    <div style="margin-bottom:14px;">
+  <label style="display:block;margin-bottom:6px;font-weight:700;">Exact Date</label>
+  <input id="reviewDate" type="date" style="height:52px;min-height:52px;padding:10px 14px;" onchange="renderTimesheetReview()">
 </div>
+
+<div style="margin-bottom:10px;">
+  <label style="display:block;margin-bottom:6px;font-weight:700;">Week</label>
+  <input id="reviewWeek" type="week" style="height:52px;min-height:52px;padding:10px 14px;" onchange="renderTimesheetReview()">
+</div>
+
+<div id="reviewWeekDates" style="font-size:14px;color:#475569;margin-bottom:10px;"></div>
    <button class="secondary" type="button" onclick="exportTimesheetWeekPDF()">Export Week to PDF</button>
     <div id="timesheetReviewList"></div>
 
