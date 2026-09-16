@@ -208,7 +208,8 @@ button.secondary{
     <label>Work being carried out</label><textarea id="regReason"></textarea>
     <div class="checkbox"><input type="checkbox" id="regInduct"><label for="regInduct" style="margin:0;font-weight:500">I confirm I have read and understood the site induction, PPE requirements, emergency procedures and site rules. *</label></div>
     <div class="checkbox"><input type="checkbox" id="regSwms"><label for="regSwms" style="margin:0;font-weight:500">Where applicable, I confirm I have reviewed the relevant SWMS/JSA for my work.</label></div>
-    <button class="green" style="margin-top:14px" onclick="registerAndSignIn()">REGISTER & SIGN IN</button>
+    <div class="checkbox"><input id="regInducted" type="checkbox"> <label for="regInducted">I have completed the site induction</label></div>
+   <button class="green" style="margin-top:14px" onclick="registerAndSignIn()">REGISTER & SIGN IN</button>
   </div>
 </section>
 
@@ -605,7 +606,7 @@ function registerAndSignIn(){
   let p=people.find(x=>x.mobile===m);
 
   if(!p){
-  p={id:Date.now(),name:n,company:c,mobile:m,trade:t,white:w,rego:regRego.value.trim()};
+  p={id:Date.now(),name:n,company:c,mobile:m,trade:t,white:w,rego:regRego.value.trim(),inducted:regInducted.checked};
   people.push(p);
 }else{
   Object.assign(p,{
@@ -614,7 +615,7 @@ function registerAndSignIn(){
     mobile:m,
     trade:t,
     white:w,
-    rego:regRego.value.trim()
+    rego:regRego.value.trim(),inducted:regInducted.checked
   });
 }
 
