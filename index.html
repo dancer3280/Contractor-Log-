@@ -655,7 +655,7 @@ function findReturning(){
     return;
   }
 
-  box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} &bull; ${p.trade}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
+  box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} &bull; ${p.trade}</div><div class="small" style="margin-top:6px;font-weight:700">Site inducted: ${p.inducted ? 'YES' : 'NO'}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
 }
 
 async function quickSignIn(id){
