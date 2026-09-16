@@ -835,7 +835,7 @@ homeAddress.textContent='Choose an active project below';
   todayCount.textContent=logs.filter(x=>sameDay(x.in)).length;
 
   signoutSelect.innerHTML=on.length
-    ? '<option value="">Choose your name...</option>'+on.map(x=>`<option value="${x.id}">${x.name} â€” ${x.company}</option>`).join('')
+   ? '<option value="">Choose your name...</option>'+on.map(x=>`<option value="${x.id}">${x.name} - ${x.company}</option>`).join('')
     : '<option value="">Nobody is currently signed in</option>';
 
   rollcallList.innerHTML=on.length
