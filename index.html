@@ -222,8 +222,47 @@ button.secondary{
     <button class="red" style="margin-top:12px" onclick="signOut()">SIGN OUT NOW</button>
   </div>
 </section>
-
-<section id="admin" class="hidden">
+<section id="induction" class="hidden">
+  <button class="back" onclick="show('home')">&larr; Back</button>
+  <div class="card">
+    <h2>Site Induction</h2>
+    <p class="small">Complete this induction before commencing work on site.</p><label>Full name</label><input id="inductName"><label>Company</label><input id="inductCompany"><label>Trade / role</label><input id="inductTrade"><label>Project</label><input id="inductProject" readonly>
+  <label>Date of induction</label><input id="inductDate" type="date">
+<label>Person providing induction</label><input id="inductProvider"><label>Position</label><input id="inductProviderPosition"><h3 style="margin-top:24px">Site Induction Checklist</h3>
+<div class="checkbox"><input type="checkbox" id="inductIntro"><label for="inductIntro">Introduction completed</label></div>
+ <div class="checkbox"><input type="checkbox" id="inductSiteTour"><label for="inductSiteTour">Organisational overview and site tour completed</label></div>
+  <div class="checkbox"><input type="checkbox" id="inductSiteRules"><label for="inductSiteRules">OHS policy, site rules and site hazards explained</label></div>
+  <div class="checkbox"><input type="checkbox" id="inductEmergency"><label for="inductEmergency">Emergency procedures and emergency contact details explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductHazard"><label for="inductHazard">Hazard reporting procedures explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductIncident"><label for="inductIncident">Incident and injury reporting procedures explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductFirstAid"><label for="inductFirstAid">First aid procedures and first aid kit location explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductPPE"><label for="inductPPE">PPE requirements explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductRestricted"><label for="inductRestricted">Restricted areas explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductAccess"><label for="inductAccess">Site security and access arrangements explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductPermit"><label for="inductPermit">Permit to work requirements explained where applicable</label></div>
+<div class="checkbox"><input type="checkbox" id="inductInsurance"><label for="inductInsurance">Public liability / professional indemnity requirements checked where applicable</label></div>
+<div class="checkbox"><input type="checkbox" id="inductLicences"><label for="inductLicences">Licences and competency certificates reviewed where applicable</label></div>
+<div class="checkbox"><input type="checkbox" id="inductPlant"><label for="inductPlant">Plant inspection requirements explained where applicable</label></div>
+<div class="checkbox"><input type="checkbox" id="inductSWMS"><label for="inductSWMS">Relevant SWMS / JSA requirements explained</label></div>
+  <div class="checkbox"><input type="checkbox" id="inductEmergencyContact"><label for="inductEmergencyContact">Emergency contact details explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductEmergencyContact"><label for="inductEmergencyContact">Emergency contact details explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductHazard2"><label for="inductHazard2">Hazard reporting procedures explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductIncident2"><label for="inductIncident2">Incident and injury reporting procedures explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductFirstAid2"><label for="inductFirstAid2">First aid procedures and first aid kit location explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductPPE2"><label for="inductPPE2">PPE requirements explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductRestricted2"><label for="inductRestricted2">Restricted areas explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductSecurity"><label for="inductSecurity">Security and site access arrangements explained</label></div>
+<div class="checkbox"><input type="checkbox" id="inductInsurance2"><label for="inductInsurance2">Public liability / professional indemnity insurance checked where applicable</label></div>
+<div class="checkbox"><input type="checkbox" id="inductLicences2"><label for="inductLicences2">Relevant licences and competency certificates reviewed</label></div> 
+   
+  <hr style="margin:24px 0">
+<h3>Induction Acknowledgement</h3>
+<p>I confirm the above site induction information has been provided to me and I understand the site rules and requirements.</p>
+<label>Person being inducted</label><input id="inductSignatureName">
+<label>Witness / person providing induction</label><input id="inductWitnessName">
+  <button class="green" style="margin-top:18px" onclick="completeInduction()">COMPLETE INDUCTION</button>
+  </div></section>
+   <section id="admin" class="hidden">
   <button class="back" onclick="show('home')">&larr; Back</button>
   <div class="card">
     <h2>Admin</h2>
@@ -657,7 +696,24 @@ function findReturning(){
 
   box.innerHTML=`<div class="person"><strong>${p.name}</strong><div class="small">${p.company} &bull; ${p.trade}</div><div class="small" style="margin-top:6px;font-weight:700">Site inducted: ${p.inducted ? 'YES' : 'NO'}</div><button class="green" style="margin-top:10px" onclick="quickSignIn(${p.id})">SIGN IN AS ${p.name.split(' ')[0].toUpperCase()}</button></div>`;
 }
+async function completeInduction(){
+  const name = document.getElementById('inductName').value.trim();
+  const company = document.getElementById('inductCompany').value.trim();
+  const trade = document.getElementById('inductTrade').value.trim();
+  const project = document.getElementById('inductProject').value.trim();
+  const date = document.getElementById('inductDate').value;
+  const provider = document.getElementById('inductProvider').value.trim();
+  const providerPosition = document.getElementById('inductProviderPosition').value.trim();
+  const signatureName = document.getElementById('inductSignatureName').value.trim();
+  const witnessName = document.getElementById('inductWitnessName').value.trim();
 
+  if(!name || !company || !trade || !project || !date || !provider || !signatureName || !witnessName){
+    return toast('Complete all induction details');
+  }
+
+  toast('Site induction completed');
+  show('home');
+}
 async function quickSignIn(id){
   let people=get(KPEOPLE,[]),p=people.find(x=>x.id===id),logs=get(KLOGS,[]);
 
