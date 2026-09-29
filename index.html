@@ -1702,15 +1702,26 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
       `).join('')
     : '<div class="small">No archived projects.</div>';
 }
-function openProjectDetails(id, name){
+async function openProjectDetails(id, name){
+  const {data, error} = await sb
+    .from('timesheets')
+    .select('*');
+
+  if(error){
+    console.error('Project timesheet load error:', error);
+    return toast('Could not load project hours');
+  }
+
   const projectHours = {};
 
-  (timesheets || []).forEach(t => {
+  (data || []).forEach(t => {
     (t.jobs || []).forEach(job => {
-      if(
-  String(job.projectId) === String(id) ||
-  String(job.projectName || '').trim().toLowerCase() === String(name || '').trim().toLowerCase()
-){
+      const matchesProject =
+        String(job.projectId || '') === String(id || '') ||
+        String(job.projectName || '').trim().toLowerCase() ===
+        String(name || '').trim().toLowerCase();
+
+      if(matchesProject){
         projectHours[t.person] =
           (projectHours[t.person] || 0) + Number(job.hours || 0);
       }
@@ -1719,12 +1730,12 @@ function openProjectDetails(id, name){
 
   const people = Object.entries(projectHours)
     .sort((a,b) => a[0].localeCompare(b[0]))
-    .map(([person,hours]) => `${person}: ${hours} hrs`)
+    .map(([person,hours]) => `${person}: ${hours} hours`)
     .join('\n');
 
   alert(
-    name + '\n\n' +
-    (people || 'No timesheet hours recorded for this project.')
+    'Project: ' + name + '\n\n' +
+    (people || 'No timesheet hours recorded')
   );
 }
 async function setProjectActive(id,active){
