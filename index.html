@@ -1679,7 +1679,7 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
 
   activeProjectsList.innerHTML = active.length
     ? active.map(p => `
-        <div class="person">
+        <div class="person" style="cursor:pointer;" onclick="openProjectDetails(${p.id}, '${p.name.replace(/'/g, "\\'")}')">
           <div>
             <strong>${p.name}</strong>
             <div class="small">${p.address || ''}</div><div class="small">Loaded by: ${p.loaded_by || 'Not recorded'}${p.loaded_at ? ' Â· ' + new Date(p.loaded_at).toLocaleString('en-AU') : ''}</div>
@@ -1702,7 +1702,9 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
       `).join('')
     : '<div class="small">No archived projects.</div>';
 }
-
+function openProjectDetails(id, name){
+  alert('Project: ' + name);
+}
 async function setProjectActive(id,active){
   const changes = active
   ? { active: true, archived_by: null, archived_at: null }
