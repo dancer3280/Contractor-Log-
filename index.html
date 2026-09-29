@@ -1707,7 +1707,10 @@ function openProjectDetails(id, name){
 
   (timesheets || []).forEach(t => {
     (t.jobs || []).forEach(job => {
-      if(String(job.projectId) === String(id)){
+      if(
+  String(job.projectId) === String(id) ||
+  String(job.projectName || '').trim().toLowerCase() === String(name || '').trim().toLowerCase()
+){
         projectHours[t.person] =
           (projectHours[t.person] || 0) + Number(job.hours || 0);
       }
