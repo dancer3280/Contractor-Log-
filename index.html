@@ -1703,6 +1703,7 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
     : '<div class="small">No archived projects.</div>';
 }
 async function openProjectDetails(id, name){
+  alert('CLICK WORKS: ' + name);
   const {data, error} = await sb
     .from('timesheets')
     .select('*');
