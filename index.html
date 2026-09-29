@@ -1703,7 +1703,26 @@ const archivedProjectsList = document.getElementById('archivedProjectsList');
     : '<div class="small">No archived projects.</div>';
 }
 function openProjectDetails(id, name){
-  alert('Project: ' + name);
+  const projectHours = {};
+
+  (timesheets || []).forEach(t => {
+    (t.jobs || []).forEach(job => {
+      if(String(job.projectId) === String(id)){
+        projectHours[t.person] =
+          (projectHours[t.person] || 0) + Number(job.hours || 0);
+      }
+    });
+  });
+
+  const people = Object.entries(projectHours)
+    .sort((a,b) => a[0].localeCompare(b[0]))
+    .map(([person,hours]) => `${person}: ${hours} hrs`)
+    .join('\n');
+
+  alert(
+    name + '\n\n' +
+    (people || 'No timesheet hours recorded for this project.')
+  );
 }
 async function setProjectActive(id,active){
   const changes = active
